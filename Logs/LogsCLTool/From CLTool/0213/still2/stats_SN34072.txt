@@ -1,0 +1,97 @@
+Total count: 43532,   Total errors: 
+
+Data Id: 1 (devInfo)
+Count: 9,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 3 (preintegratedImu)
+Count: 19060,   Errors: 0
+Timestamp Delta (ave, min, max): -1591105778, 1064334229, -805306368
+Timestamp Drops: 12
+
+Data Id: 5 (ins2)
+Count: 761,   Errors: 0
+Timestamp Delta (ave, min, max): 1130254552, 1069139129, -931135488
+Timestamp Drops: 5
+
+Data Id: 7 (config)
+Count: 1,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 10 (sysParams)
+Count: 7,   Errors: 0
+Timestamp Delta (ave, min, max): 309237643, 1076101251, -962072704
+Timestamp Drops: 0
+
+Data Id: 12 (flashCfg)
+Count: 9,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 13 (gps1Pos)
+Count: 381,   Errors: 0
+Timestamp Delta (ave, min, max): -1473851931, 1070181080, -1717989376
+Timestamp Drops: 1
+
+Data Id: 30 (gps1Vel)
+Count: 381,   Errors: 0
+Timestamp Delta (ave, min, max): -1473851931, 1070181080, -1717989376
+Timestamp Drops: 1
+
+Data Id: 35 (userpage0)
+Count: 7,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 36 (userpage1)
+Count: 7,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 48 (inl2States)
+Count: 388,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 49 (inl2CovarianceUD)
+Count: 7,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 50 (inl2Status)
+Count: 7,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 51 (inl2Misc)
+Count: 7,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 52 (magnetometer1)
+Count: 6438,   Errors: 0
+Timestamp Delta (ave, min, max): -616584191, 1065900533, -1409286144
+Timestamp Drops: 1089
+
+Data Id: 53 (barometer)
+Count: 8115,   Errors: 0
+Timestamp Delta (ave, min, max): -89539137, 1065570760, 1207959552
+Timestamp Drops: 862
+
+Data Id: 55 (magnetometer2)
+Count: 6803,   Errors: 0
+Timestamp Delta (ave, min, max): 404054163, 1065814897, -1409286144
+Timestamp Drops: 811
+
+Data Id: 59 (inl2MagObs)
+Count: 381,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 67 (inl2NedSigma)
+Count: 763,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+

@@ -1,0 +1,27 @@
+Total count: 7770,   Total errors: 
+
+Data Id: 1 (devInfo)
+Count: 17,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 3 (preintegratedImu)
+Count: 7174,   Errors: 0
+Timestamp Delta (ave, min, max): 824953463, 1064332943, -805306368
+Timestamp Drops: 9
+
+Data Id: 4 (ins1)
+Count: 575,   Errors: 0
+Timestamp Delta (ave, min, max): -403749256, 1068080155, 385875968
+Timestamp Drops: 0
+
+Data Id: 7 (config)
+Count: 2,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 12 (flashCfg)
+Count: 2,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+

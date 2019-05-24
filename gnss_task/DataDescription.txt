@@ -1,0 +1,21 @@
+gps_data      
+--------------
+
+
+1*M array of structs with the fields: 
+
+* Satellite - Name of satellite
+* Satellite_Position_NED - Position of the satellite in north, east, down coordinates. Unit [m]. 
+* PseudoRange - Measured pseudo ranges. Unit [m]
+
+
+ref_data      
+--------------
+
+Struct with the fields:
+* traj_ned - True trajectory of the vehicle in north, east, down coordinates. Unit [m]. 
+* s2r - variance of range measurement error. Unit [m].
+* c - speed of light. Unit [m]
+
+
+OBS: The data is sampled with a period of 0.2 [s].

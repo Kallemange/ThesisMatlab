@@ -1,0 +1,29 @@
+function eph = format_ephemeris3(eph_)
+keyboard
+eph = [];    
+eph.svid = eph_(1);
+eph.toc = eph_(8);
+eph.toe = eph_(27);
+eph.af0 = eph_(29);
+eph.af1 = eph_(30);
+eph.af2 = eph_(31);
+eph.ura = eph_(4); % check
+eph.e = eph_(6);
+eph.sqrtA = eph_(4);
+eph.dn = eph_(5);
+eph.m0 = eph_(3);
+eph.w = eph_(7);
+eph.omg0 = eph_(16);
+eph.i0 = eph_(12);
+eph.odot = eph_(17);
+%eph.wdot = eph_(17);
+eph.idot = eph_(13);
+eph.cus = eph_(9);
+eph.cuc = eph_(8);
+eph.cis = eph_(15);
+eph.cic = eph_(14);
+eph.crs = eph_(11);
+eph.crc = eph_(10);
+eph.iod = eph_(22);
+eph.GPSWeek = eph_(24);
+end

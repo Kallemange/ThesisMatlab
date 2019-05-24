@@ -1,0 +1,32 @@
+Total count: 118464,   Total errors: 
+
+Data Id: 3 (preintegratedImu)
+Count: 38410,   Errors: 0
+Timestamp Delta (ave, min, max): 1327386213, -536870912, 778829824
+Timestamp Drops: 6958
+
+Data Id: 4 (ins1)
+Count: 38410,   Errors: 0
+Timestamp Delta (ave, min, max): -213696890, 1879048192, 167772160
+Timestamp Drops: 6128
+
+Data Id: 13 (gps1Pos)
+Count: 768,   Errors: 0
+Timestamp Delta (ave, min, max): 938506964, 0, -1717567488
+Timestamp Drops: 383
+
+Data Id: 30 (gps1Vel)
+Count: 768,   Errors: 0
+Timestamp Delta (ave, min, max): 938506964, 0, -1717567488
+Timestamp Drops: 383
+
+Data Id: 58 (imuDual)
+Count: 38411,   Errors: 0
+Timestamp Delta (ave, min, max): 945820248, -536870912, 778829824
+Timestamp Drops: 6993
+
+Data Id: 69 (gps1Raw)
+Count: 1697,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+

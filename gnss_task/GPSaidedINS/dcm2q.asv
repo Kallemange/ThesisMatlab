@@ -1,0 +1,9 @@
+function q=dcm2q(R)
+%
+% function q=dcm2q(R)
+% Function for transformation from directional cosine matrix to quaternions 
+% Edit: Isaac Skog, 2007-05-24
+
+q=zeros(4,1);
+
+q(1)=

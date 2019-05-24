@@ -1,0 +1,17 @@
+Total count: 22324,   Total errors: 
+
+Data Id: 1 (devInfo)
+Count: 42,   Errors: 0
+Timestamp Delta (ave, min, max): 0, 0, 0
+Timestamp Drops: 0
+
+Data Id: 3 (preintegratedImu)
+Count: 20624,   Errors: 0
+Timestamp Delta (ave, min, max): 1759896848, 1064335109, -268435456
+Timestamp Drops: 46
+
+Data Id: 4 (ins1)
+Count: 1658,   Errors: 0
+Timestamp Delta (ave, min, max): 1319912284, 1068080327, -83886080
+Timestamp Drops: 0
+
