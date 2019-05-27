@@ -13,6 +13,12 @@ function estGlobalPos()
        %b)Relative positioning from global estimates
        %c)Relative estimates from DD-method
 
+%Args: T: epochs in raw       
+       
 load eph.mat
-
+T=length(raw);
+for i=1:T
+    
+end
+    
 keyboard
