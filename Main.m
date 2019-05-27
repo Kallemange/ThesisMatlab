@@ -104,6 +104,7 @@ addpath simulateRawData\;
 dir ='N';
 t0=1.555058801792000e+09;
 [sat1 sat2 raw1 raw2] = simulateMain(t0, sets);
+%%
 % Calculate distance from pseudorange measurements
 %IN satellite data[2], raw data[2]
 %OUT pseudo range distance between reciever ab, unit vector to satellites
