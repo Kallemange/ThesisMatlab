@@ -15,12 +15,16 @@ function estGlobalPos(raw, eph)
 
 %Args: T: epochs in raw       
        
+
 T=length(raw);
 for i=1:T
     t=raw(i).ToW;
+    %All satellite positions in a n*3-matrix
+    satPosECEF=zeros(length(eph),3);
     for j=1:length(eph)
-        satPos=get_satellite_position(eph(j),t,1);
-        keyboard
+        %For each satellite, calculate the ECEF-position in xyz. 
+        [xs, ys, zs]=get_satellite_position(eph(j),t,1);
+        satPosECEF(j,:)=[xs, ys, zs];
     end
     keyboard
 end

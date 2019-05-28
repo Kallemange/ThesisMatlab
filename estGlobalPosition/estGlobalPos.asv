@@ -1,4 +1,4 @@
-function estGlobalPos()
+function estGlobalPos(raw, eph)
 %Estimate global position from the raw data available in obsd_t and eph_t 
 %calculations based on those presented in telesens
 
@@ -15,10 +15,15 @@ function estGlobalPos()
 
 %Args: T: epochs in raw       
        
-load eph.mat
+
 T=length(raw);
 for i=1:T
-    
+    t=raw(i).ToW;
+    for j=1:length(eph)
+        [satPos=get_satellite_position(eph(j),t,1);
+        keyboard
+    end
+    keyboard
 end
     
 keyboard

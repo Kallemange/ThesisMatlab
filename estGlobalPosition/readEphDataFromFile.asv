@@ -32,8 +32,7 @@ while ischar(tline)
     end
     catch ME
         fclose(fid);
-        emptyIndex = find(arrayfun(@(eph) isempty(eph.sat),eph));
-        eph(emptyIndex)=[];
+        
         return;
     end
 

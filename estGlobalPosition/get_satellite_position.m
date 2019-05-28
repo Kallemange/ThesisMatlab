@@ -42,7 +42,12 @@
 
 	% Now follow table 20-IV
 	A = eph.A;
+    try
 	cmm = sqrt(mu/A^3); % computed mean motion
+    catch EM
+        
+        keyboard
+    end
 	tk = t - eph.toe;
 	% account for beginning of end of week crossover
 	if (tk > 302400)
@@ -52,10 +57,14 @@
 		tk = tk+604800;
 	end 
 	% apply mean motion correction
-	n = cmm + eph.dn;
+	%n = cmm + eph.dn;
+    %Updated: in IS documentation it's called deln (presumably)
+    n = cmm + eph.deln;
 
 	% Mean anomaly
-	mk = eph.m0 + n*tk;
+    %mk = eph.m0 + n*tk;
+    %Renamed
+	mk = eph.M0 + n*tk;
 
 	% solve for eccentric anomaly
 	syms E;
@@ -67,7 +76,10 @@
 	nu = atan2((sqrt(1-eph.e^2))*sin(Ek)/(1-eph.e*cos(Ek)), (cos(Ek)-eph.e)/(1-eph.e*cos(Ek)));
 	%Ek = acos((e  + cos(nu))/(1+e*cos(nu)));
 
-	Phi = nu + eph.w;
+	%Phi = nu + eph.w;
+    %Updated:
+    Phi = nu + eph.omg;
+    
 	du = 0;
 	dr = 0;
 	di = 0;
@@ -85,7 +97,7 @@
 	i = eph.i0 + eph.idot*tk + di;
 	x_prime = r*cos(u);
 	y_prime = r*sin(u);
-	omega = eph.omg0 + (eph.odot - omega_dot_earth)*tk - omega_dot_earth*eph.toe;
+	omega = eph.OMG0 + (eph.OMGd - omega_dot_earth)*tk - omega_dot_earth*eph.toe;
 
 	x = x_prime*cos(omega) - y_prime*cos(i)*sin(omega);
 	y = x_prime*sin(omega) + y_prime*cos(i)*cos(omega);
