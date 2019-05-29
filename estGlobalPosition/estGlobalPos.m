@@ -26,11 +26,14 @@ for i=1:T
     %All satellite positions in a n*3-matrix
     satPosECEF=zeros(length(eph),3);
     %Calculate the satellite clock bias
-    %dsv = estimate_satellite_clock_bias(t, eph);
+    dsv = zeros(size(eph));
     for j=1:length(eph)
+    dsv(j) = estimate_satellite_clock_bias(t, eph(j));
+    end
+    for k=1:length(eph)
         %For each satellite, calculate the ECEF-position in xyz. 
-        [xs, ys, zs]=get_satellite_position(eph(j),t,1);      
-        satPosECEF(j,:)=[xs, ys, zs];        
+        [xs, ys, zs]=get_satellite_position(eph(k),t,1);      
+        satPosECEF(k,:)=[xs, ys, zs];        
     end
     %[lat lon alt]=ECEF2LLA(satPosECEF);
     %[[eph(:).sat]' lat*180/pi lon*180/pi]
