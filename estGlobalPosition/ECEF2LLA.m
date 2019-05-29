@@ -19,6 +19,11 @@
 %        (4) Tested but no warranty; use at your own risk.
 %        (5) Michael Kleder, April 2006
 function [lat,lon,alt] = ECEF2LLA(x,y,z)
+if nargin==1
+    y=x(:,2);
+    z=x(:,3);
+    x=x(:,1);
+end
 % WGS84 ellipsoid constants:
 a = 6378137;
 e = 8.1819190842622e-2;

@@ -14,24 +14,24 @@ function estGlobalPos(raw, eph)
        %c)Relative estimates from DD-method
 
 %Args: T: epochs in raw       
-% t0r=datetime(raw(1).ToW,'ConvertFrom','posixtime');
-% start_time=[t0r.Year, t0r.Month, t0r.Day, t0r.Hour, t0r.Minute, floor(t0r.Second)];
-% 
-% [~, s]=UTC2GPStime(start_time);
-% %Adjust for leap seconds ~(-17) s
-% start_time(end)=start_time(end)+17;
-% s=s-17;       
-% 
- T=length(raw);
+
+T=length(raw);
 for i=1:T
-    t=raw(i).ToW;
+    t=1558449864;
+    %t=raw(i).ToW;
     %All satellite positions in a n*3-matrix
     satPosECEF=zeros(length(eph),3);
+    %Calculate the satellite clock bias
+    %dsv = estimate_satellite_clock_bias(t, eph);
     for j=1:length(eph)
         %For each satellite, calculate the ECEF-position in xyz. 
-        [xs, ys, zs]=get_satellite_position(eph(j),t,1);
+        [xs, ys, zs]=get_satellite_position(eph(j),t,1);      
         satPosECEF(j,:)=[xs, ys, zs];        
     end
+    %[lat lon alt]=ECEF2LLA(satPosECEF);
+    %[[eph(:).sat]' lat*180/pi lon*180/pi]
+    lla=ecef2lla(satPosECEF, 'WGS84');
+    [[eph(:).sat]' lla(:,1:2)]
     keyboard
 end
     
