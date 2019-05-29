@@ -17,19 +17,12 @@ function estGlobalPos(raw, eph)
 
 T=length(raw);
 for i=1:T
-    %t=1558449864;
-    %t0r=datetime(t,'ConvertFrom','posixtime');
-    t=raw(i).ToW;
-    t0r=datetime(raw(1).ToW,'ConvertFrom','posixtime');
     %Time is converted from posix (seconds since 1970) to ToW used in GPS
     %to get alignment.
     t0Posix=datetime(raw(i).ToW,'ConvertFrom','posixtime');
     start_time=[t0Posix.Year, t0Posix.Month, t0Posix.Day, t0Posix.Hour, t0Posix.Minute, floor(t0Posix.Second)];
     [~, t]=UTC2GPStime(start_time);
-    %Adjust for leap seconds ~(-17) s
-    %start_time(end)=start_time(end)+17;
-    %s=s-17;
-    %t=raw(i).ToW;
+    
     %All satellite positions in a n*3-matrix
     satPosECEF=zeros(length(eph),3);
     %Calculate the satellite clock bias
