@@ -1,7 +1,7 @@
-function eph=readEphDataFromBagFile(path)
+function eph=readEphDataFromFile(path)
 fid = fopen(path,'r');
 tline=fgetl(fid);
-titles=strsplit(tline, {','});
+titles=strsplit(tline, {',',' '});
 titles=string(titles);
 %several gtime parameters have been logged separate (e.g. toe1 and toe2)
 %must be merged (in name and in value)
@@ -12,16 +12,11 @@ i=1;
 while ischar(tline)
     tline=fgetl(fid);
     try
-    line=string(strsplit(tline, {','}));
-    for i=2:length(line)
-        line2(i)=str2num(line(i));
-    end
-    line2(isnan(line2))=0;
-    line2([11 13 15])=posix2GPSTime(line2([11 13 15]));
-    line=removeGtimeVal(line2, titles);
-    for j=3:length(line)-1
-        temp=char(titles(j));
-        obs.(temp(2:end))=line(j);
+    line=str2num(tline);
+    line([9 11 13])=posix2GPSTime(line([9 11 13]));
+    line=removeGtimeVal(line);
+    for j=1:L
+        obs.(titles(j))=line(j);
     end
     %Initiate the struct-array or expand if needed
     if (~exist('eph')||obs.sat>length(eph))
@@ -52,16 +47,16 @@ function t=removeExtraTitles(t)
 %toe1 & toe2 => toe
 %toc1 & toc2 => toc
 %ttr1 & ttr2 => ttr
-t(t==".header.frame_id")=[];
-t(t==".toe.time")=".toe";
-t(t==".toe.sec")=[];
-t(t==".toc.time")=".toc";
-t(t==".toc.sec")=[];
-t(t==".ttr.time")=".ttr";
-t(t==".ttr.sec")=[];
+t(t=="toe1")="toe";
+t(t=="toe2")=[];
+t(t=="toc1")="toc";
+t(t=="toc2")=[];
+t(t=="ttr1")="ttr";
+t(t=="ttr2")=[];
+
 function tVec=posix2GPSTime(t)
 %Update time format from posix (since 1970 -> time in week and s)
-tVec=zeros(1,length(t));
+tVec=zeros(length(t))
 for i=1:length(t)
     t0Posix=datetime(t(i),'ConvertFrom','posixtime');
     start_time=[t0Posix.Year, t0Posix.Month, t0Posix.Day, t0Posix.Hour, t0Posix.Minute, floor(t0Posix.Second)];
@@ -69,13 +64,11 @@ for i=1:length(t)
     tVec(i)=ToW;
 end
 
-
-
-function l=removeGtimeVal(l, t)
+function l=removeGtimeVal(l)
 %Add the values of toe1+toe2, toc1+toc2, ttr1+ttr2, remove all 2:s
+l(9)=l(9)+l(10);
 l(11)=l(11)+l(12);
 l(13)=l(13)+l(14);
-l(15)=l(15)+l(16);
-l([12 14 16])=[];
+l([10 12 14])=[];
 
 
