@@ -17,8 +17,11 @@ function estGlobalPos(raw, eph)
 
 T=length(raw);
 for i=1:T
-    t=1558449864;
-    %t=raw(i).ToW;
+    %t=1558449864;
+    %t0r=datetime(t,'ConvertFrom','posixtime');
+    t=raw(i).ToW;
+    t0r=datetime(raw(1).ToW,'ConvertFrom','posixtime');
+    testtime=0;
     %All satellite positions in a n*3-matrix
     satPosECEF=zeros(length(eph),3);
     %Calculate the satellite clock bias
