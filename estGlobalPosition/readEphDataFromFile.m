@@ -13,6 +13,7 @@ while ischar(tline)
     tline=fgetl(fid);
     try
     line=str2num(tline);
+    line([9 11 13])=posix2GPSTime(line([9 11 13]));
     line=removeGtimeVal(line);
     for j=1:L
         obs.(titles(j))=line(j);
@@ -52,6 +53,16 @@ t(t=="toc1")="toc";
 t(t=="toc2")=[];
 t(t=="ttr1")="ttr";
 t(t=="ttr2")=[];
+
+function tVec=posix2GPSTime(t)
+%Update time format from posix (since 1970 -> time in week and s)
+tVec=zeros(1,length(t));
+for i=1:length(t)
+    t0Posix=datetime(t(i),'ConvertFrom','posixtime');
+    start_time=[t0Posix.Year, t0Posix.Month, t0Posix.Day, t0Posix.Hour, t0Posix.Minute, floor(t0Posix.Second)];
+    [~, ToW]=UTC2GPStime(start_time);
+    tVec(i)=ToW;
+end
 
 function l=removeGtimeVal(l)
 %Add the values of toe1+toe2, toc1+toc2, ttr1+ttr2, remove all 2:s
