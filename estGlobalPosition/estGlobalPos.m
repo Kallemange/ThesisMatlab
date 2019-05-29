@@ -18,6 +18,7 @@ function estGlobalPos(raw, eph)
 T=length(raw);
 for i=1:T
     t=1558449864;
+    testval=0;
     %t=raw(i).ToW;
     %All satellite positions in a n*3-matrix
     satPosECEF=zeros(length(eph),3);
