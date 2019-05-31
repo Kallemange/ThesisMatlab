@@ -67,11 +67,11 @@ GPS_start_time=[1980 1 6 0 0 0];
 
 %% Number of leap seconds  
 num_of_leap_seconds=sum(datenum(UTCtime)>datenum(leap_sec_dates)); 
-nr_of_elpased_sec=etime(UTCtime,GPS_start_time)+num_of_leap_seconds;
+nr_of_elapsed_sec=etime(UTCtime,GPS_start_time)+num_of_leap_seconds;
 
 %% Calculate GPS time
-week=floor(nr_of_elpased_sec / (7*24*60*60));
-sec=round(nr_of_elpased_sec-7*24*60*60*week);
+week=floor(nr_of_elapsed_sec / (7*24*60*60));
+sec=round(nr_of_elapsed_sec-7*24*60*60*week);
 
 
 
