@@ -18,21 +18,20 @@ while ischar(tline)
             P=[];
             first=true;
             while(1)
+               for i=1:6
                fgetl(fid);
-               fgetl(fid);
+               end
                tline=fgetl(fid);
                line=strsplit(tline);
                time=str2num(line{3});
                tline=fgetl(fid);
                line=strsplit(tline);
-               sec=str2num(strcat('0.',line{3}));
+               sec=str2num(line{3});
                if(first)
                    obs.ToW=time+sec;
                    first=false;
                end
-               for i=1:5
                tline=fgetl(fid);
-               end
                line=strsplit(tline);
                sat=[sat; str2num(line{2})];
                for i=1:8

@@ -28,16 +28,18 @@ b = 0;
 satID=[eph(:).sat]';
 satID=satID(satID<=32);
 xVec=[];
-t_end=10;
+t_end=5;
 tVec=[raw(1:t_end).ToW];
 for i=1:t_end
     %Time is converted from posix (seconds since 1970) to ToW used in GPS
-    %to get alignment.
+    %to get alignment. 
     t0Posix=datetime(raw(i).ToW,'ConvertFrom','posixtime');
     start_time=[t0Posix.Year, t0Posix.Month, t0Posix.Day, t0Posix.Hour, ...
                 t0Posix.Minute, floor(t0Posix.Second)];
     [~, t]=UTC2GPStime(start_time);
-    t=t+19;
+    %Time seems like it needs to be added for alignment (error in
+    %UTC<->TAI conversion?)
+    %t=t-18;
     %Extract those measurements in raw which has corresponding eph-data
     %Also use only that eph-data for satellites which has an obs
     raw_t=sortrows(raw(i).data, 1);
@@ -84,10 +86,10 @@ for i=1:t_end
     %[lat lon alt]=ECEF2LLA(satPosECEF);
     %[[eph(:).sat]' lat*180/pi lon*180/pi]
     lla=ecef2lla(xu, 'WGS84');
-    lla(1:2)
+    lla(1:2);
     xVec=[xVec; x_];
 end
-figure(1)
+figure
 labelVec=['x', 'y', 'z'];
 for i=1:3
     subplot(3,1,i)
@@ -95,6 +97,4 @@ for i=1:3
     xlabel(strcat(labelVec(i),'-axis in ECEF'))
 end
 keyboard
-
-
 end
