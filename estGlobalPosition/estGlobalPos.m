@@ -28,15 +28,19 @@ b = 0;
 satID=[eph(:).sat]';
 satID=satID(satID<=32);
 xVec=[];
-t_end=5;
-tVec=[raw(1:t_end).ToW];
-for i=1:t_end
+h=50;
+t_end=500;
+tVec=[raw(1:h:t_end).ToW];
+allSatPos=zeros(89, 3*t_end);
+for i=1:h:t_end
     %Time is converted from posix (seconds since 1970) to ToW used in GPS
     %to get alignment. 
+    t_decimal=raw(i).ToW-floor(raw(i).ToW);
     t0Posix=datetime(raw(i).ToW,'ConvertFrom','posixtime');
     start_time=[t0Posix.Year, t0Posix.Month, t0Posix.Day, t0Posix.Hour, ...
                 t0Posix.Minute, floor(t0Posix.Second)];
     [~, t]=UTC2GPStime(start_time);
+    t=t+t_decimal;
     %Time seems like it needs to be added for alignment (error in
     %UTC<->TAI conversion?)
     %t=t-18;
@@ -51,9 +55,9 @@ for i=1:t_end
     for j=1:length(eph_t)
         dsv(j) = estimate_satellite_clock_bias(t, eph_t(j));   
     end
+    
     %And transform it to a distance through c
     %Adjust the raw pr-measurement for the clock bias of the sv
-    %(Looks unreasonably large with distances of up to 1e6)
     obsAdj=obs+dsv'*c;
     
     dx = 100*ones(1,3); db = 100;
@@ -76,6 +80,7 @@ for i=1:t_end
             Xs = [Xs; xs_vec'];
         end
         [x_, b_, norm_dp, G] = estimate_position(Xs, pr, length(iR), xu, b, 3);
+        
         % Change in the position and bias to determine when to quit
         % the iteration
         dx = x_ - xu;
@@ -88,6 +93,7 @@ for i=1:t_end
     lla=ecef2lla(xu, 'WGS84');
     lla(1:2);
     xVec=[xVec; x_];
+    allSatPos(satID(iE), 1+(i-1)*3:3+(i-1)*3)=Xs;
 end
 figure
 labelVec=['x', 'y', 'z'];
