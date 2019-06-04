@@ -27,20 +27,23 @@ b = 0;
 %All the svID's available in the eph-data for referencing
 satID=[eph(:).sat]';
 satID=satID(satID<=32);
-xVec=[];
-t_end=8;
-tVec=[raw(1:t_end).ToW];
+xVec=[]; bVec=[]; llaVec=[];
+h=50;
+t_end=500;
+tVec=[raw(1:h:t_end).ToW];
 allSatPos=zeros(89, 3*t_end);
-for i=1:t_end
+for i=1:h:t_end
     %Time is converted from posix (seconds since 1970) to ToW used in GPS
     %to get alignment. 
+    t_decimal=raw(i).ToW-floor(raw(i).ToW);
     t0Posix=datetime(raw(i).ToW,'ConvertFrom','posixtime');
     start_time=[t0Posix.Year, t0Posix.Month, t0Posix.Day, t0Posix.Hour, ...
                 t0Posix.Minute, floor(t0Posix.Second)];
     [~, t]=UTC2GPStime(start_time);
+    t=t+t_decimal;
     %Time seems like it needs to be added for alignment (error in
     %UTC<->TAI conversion?)
-    t=t-18;
+    %t=t-18;
     %Extract those measurements in raw which has corresponding eph-data
     %Also use only that eph-data for satellites which has an obs
     raw_t=sortrows(raw(i).data, 1);
@@ -55,7 +58,6 @@ for i=1:t_end
     
     %And transform it to a distance through c
     %Adjust the raw pr-measurement for the clock bias of the sv
-    %(Looks unreasonably large with distances of up to 1e6)
     obsAdj=obs+dsv'*c;
     
     dx = 100*ones(1,3); db = 100;
@@ -78,18 +80,20 @@ for i=1:t_end
             Xs = [Xs; xs_vec'];
         end
         [x_, b_, norm_dp, G] = estimate_position(Xs, pr, length(iR), xu, b, 3);
-        
+        tauVec=tau
         % Change in the position and bias to determine when to quit
         % the iteration
         dx = x_ - xu;
         db = b_ - b;
         xu = x_;
         b = b_;
+        bVec=[bVec b];
     end
     %[lat lon alt]=ECEF2LLA(satPosECEF);
     %[[eph(:).sat]' lat*180/pi lon*180/pi]
     lla=ecef2lla(xu, 'WGS84');
     lla(1:2);
+    llaVec=[llaVec; lla];
     xVec=[xVec; x_];
     allSatPos(satID(iE), 1+(i-1)*3:3+(i-1)*3)=Xs;
 end

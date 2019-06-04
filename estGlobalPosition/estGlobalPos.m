@@ -1,4 +1,4 @@
-function xVec=estGlobalPos(raw, eph)
+function [xVec tVec]=estGlobalPos(raw, eph)
 %Estimate global position from the raw data available in obsd_t and eph_t 
 %calculations based on those presented in telesens
 
@@ -26,13 +26,14 @@ xu = [0 0 0];
 b = 0;
 %All the svID's available in the eph-data for referencing
 satID=[eph(:).sat]';
-satID=satID(satID<=32);
+%satID=satID(satID<=32);
 xVec=[];
-h=50;
-t_end=500;
+h=10;
+t_end=50;
 tVec=[raw(1:h:t_end).ToW];
 allSatPos=zeros(89, 3*t_end);
 for i=1:h:t_end
+    ['iteration:'    num2str(i)]
     %Time is converted from posix (seconds since 1970) to ToW used in GPS
     %to get alignment. 
     t_decimal=raw(i).ToW-floor(raw(i).ToW);
@@ -43,7 +44,7 @@ for i=1:h:t_end
     t=t+t_decimal;
     %Time seems like it needs to be added for alignment (error in
     %UTC<->TAI conversion?)
-    %t=t-18;
+    %t=t-0.05;
     %Extract those measurements in raw which has corresponding eph-data
     %Also use only that eph-data for satellites which has an obs
     raw_t=sortrows(raw(i).data, 1);
@@ -75,8 +76,8 @@ for i=1:h:t_end
             [xs_, ys_, zs_]=get_satellite_position(eph_t(k),t-tau,1);
             % express satellite position in ECEF frame at time t
             theta = omega_e*tau;
-            xs_vec = [cos(theta) sin(theta) 0; -sin(theta) cos(theta) 0; 0 0 1]*[xs_; ys_; zs_];
-            %xs_vec = [xs_ ys_ zs_]';
+            %xs_vec = [cos(theta) sin(theta) 0; -sin(theta) cos(theta) 0; 0 0 1]*[xs_; ys_; zs_];
+            xs_vec = [xs_ ys_ zs_]';
             Xs = [Xs; xs_vec'];
         end
         [x_, b_, norm_dp, G] = estimate_position(Xs, pr, length(iR), xu, b, 3);
@@ -87,11 +88,15 @@ for i=1:h:t_end
         db = b_ - b;
         xu = x_;
         b = b_;
+        
     end
     %[lat lon alt]=ECEF2LLA(satPosECEF);
     %[[eph(:).sat]' lat*180/pi lon*180/pi]
+    bVec=[bVec b];
+    tauVec=[tauVec tau];
     lla=ecef2lla(xu, 'WGS84');
-    lla(1:2);
+    lla
+    llaVec=[llaVec; lla];
     xVec=[xVec; x_];
     allSatPos(satID(iE), 1+(i-1)*3:3+(i-1)*3)=Xs;
 end
@@ -102,5 +107,5 @@ for i=1:3
     plot(tVec-tVec(1),xVec(:,i)-xVec(1,i), '*')
     xlabel(strcat(labelVec(i),'-axis in ECEF'))
 end
-keyboard
+%keyboard
 end
