@@ -1,4 +1,4 @@
-function [xVec tVec]=estGlobalPos(raw, eph)
+function [xVec tVec]=estGlobalPos(raw, eph, t_end, h, plotOut)
 %Estimate global position from the raw data available in obsd_t and eph_t 
 %calculations based on those presented in telesens
 
@@ -8,10 +8,7 @@ function [xVec tVec]=estGlobalPos(raw, eph)
     %a new read is made an updated value may be introduced
 %2) Perform global positioning of satellites
     %(Keep track of the time transformation from UTC-GPST)
-%3) Try 3 different things:
-       %a)Global positioning
-       %b)Relative positioning from global estimates
-       %c)Relative estimates from DD-method
+
 
 %Args: T: epochs in raw       
 % Constants that we will need
@@ -28,12 +25,17 @@ b = 0;
 satID=[eph(:).sat]';
 %satID=satID(satID<=32);
 xVec=[];
-h=10;
-t_end=50;
+if nargin<5
+    plotOut=0;
+end
+if nargin<4
+    h=1;
+end
+if nargin<3
+    t_end=5;
+end
 tVec=[raw(1:h:t_end).ToW];
-allSatPos=zeros(89, 3*t_end);
 for i=1:h:t_end
-    ['iteration:'    num2str(i)]
     %Time is converted from posix (seconds since 1970) to ToW used in GPS
     %to get alignment. 
     t_decimal=raw(i).ToW-floor(raw(i).ToW);
@@ -92,20 +94,24 @@ for i=1:h:t_end
     end
     %[lat lon alt]=ECEF2LLA(satPosECEF);
     %[[eph(:).sat]' lat*180/pi lon*180/pi]
-    bVec=[bVec b];
-    tauVec=[tauVec tau];
-    lla=ecef2lla(xu, 'WGS84');
-    lla
-    llaVec=[llaVec; lla];
+    %lla=ecef2lla(xu, 'WGS84');
+    [lambda, phi, h] = WGStoEllipsoid(xu(1), xu(2), xu(3));    
+    lat = phi*180/pi;
+    lon = lambda*180/pi;
+    R1=rot(90+lon, 3);
+    R2=rot(90-lat, 1);
+    R=R2*R1;
     xVec=[xVec; x_];
-    allSatPos(satID(iE), 1+(i-1)*3:3+(i-1)*3)=Xs;
+
 end
-figure
-labelVec=['x', 'y', 'z'];
-for i=1:3
-    subplot(3,1,i)
-    plot(tVec-tVec(1),xVec(:,i)-xVec(1,i), '*')
-    xlabel(strcat(labelVec(i),'-axis in ECEF'))
+if(plotOut)
+    figure
+    labelVec=['x', 'y', 'z'];
+    for i=1:3
+        subplot(3,1,i)
+        plot(tVec-tVec(1),xVec(:,i)-xVec(1,i), '*')
+        xlabel(strcat(labelVec(i),'-axis in ECEF'))
+    end
 end
 %keyboard
 end
