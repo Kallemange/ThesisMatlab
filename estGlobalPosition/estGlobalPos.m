@@ -36,6 +36,7 @@ if nargin<3
 end
 tVec=[raw(1:h:t_end).ToW];
 for i=1:h:t_end
+    i
     %Time is converted from posix (seconds since 1970) to ToW used in GPS
     %to get alignment. 
     t_decimal=raw(i).ToW-floor(raw(i).ToW);
@@ -78,8 +79,8 @@ for i=1:h:t_end
             [xs_, ys_, zs_]=get_satellite_position(eph_t(k),t-tau,1);
             % express satellite position in ECEF frame at time t
             theta = omega_e*tau;
-            %xs_vec = [cos(theta) sin(theta) 0; -sin(theta) cos(theta) 0; 0 0 1]*[xs_; ys_; zs_];
-            xs_vec = [xs_ ys_ zs_]';
+            xs_vec = [cos(theta) sin(theta) 0; -sin(theta) cos(theta) 0; 0 0 1]*[xs_; ys_; zs_];
+            %xs_vec = [xs_ ys_ zs_]';
             Xs = [Xs; xs_vec'];
         end
         [x_, b_, norm_dp, G] = estimate_position(Xs, pr, length(iR), xu, b, 3);
@@ -95,12 +96,12 @@ for i=1:h:t_end
     %[lat lon alt]=ECEF2LLA(satPosECEF);
     %[[eph(:).sat]' lat*180/pi lon*180/pi]
     %lla=ecef2lla(xu, 'WGS84');
-    [lambda, phi, h] = WGStoEllipsoid(xu(1), xu(2), xu(3));    
-    lat = phi*180/pi;
-    lon = lambda*180/pi;
-    R1=rot(90+lon, 3);
-    R2=rot(90-lat, 1);
-    R=R2*R1;
+    %[lambda, phi, h] = WGStoEllipsoid(xu(1), xu(2), xu(3));    
+    %lat = phi*180/pi;
+    %lon = lambda*180/pi;
+    %R1=rot(90+lon, 3);
+    %R2=rot(90-lat, 1);
+    %R=R2*R1;
     xVec=[xVec; x_];
 
 end

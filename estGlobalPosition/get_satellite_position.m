@@ -74,7 +74,7 @@
 
 	% True anomaly:
 	nu = atan2((sqrt(1-eph.e^2))*sin(Ek)/(1-eph.e*cos(Ek)), (cos(Ek)-eph.e)/(1-eph.e*cos(Ek)));
-	%Ek = acos((e  + cos(nu))/(1+e*cos(nu)));
+	Ek = acos((eph.e  + cos(nu))/(1+eph.e*cos(nu)));
 
 	%Phi = nu + eph.w;
     %Updated:
