@@ -14,8 +14,8 @@ function [az el] = get_satellite_az_el(xs,ys,zs,xu,yu,zu)
     lat = phi*180/pi;
     lng = lambda*180/pi;
     enu =rotxyz2enu([xs-xu,ys-yu,zs-zu]', lat, lng);
-    az = atan2(enu(1), enu(2));
-    el = asin(enu(3)/norm(enu));
+    az = atan2d(enu(1), enu(2));
+    el = asind(enu(3)/norm(enu));
     % The azimuth and elevation
 end
 

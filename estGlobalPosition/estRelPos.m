@@ -36,6 +36,9 @@ eph=eph([eph(:).sat]<=32);
 D1Vec=zeros(89,10);
 D2Vec=zeros(89,10);
 DDVec=zeros(89,10);
+
+%Elevation and azimuth angle vectors
+elevAzim={};
 for i=1:1:10
     t=unix2GPSTime(r1(i).ToW);
     t2_low=find([r2(:).ToW]<r1(i).ToW, 1, 'last');
@@ -59,8 +62,11 @@ for i=1:1:10
     for j=1:length(eph_t)
         [xs, ys,zs]=get_satellite_position(eph_t(j), t-tau(j), 1);
         satPos(j,:)=[xs, ys, zs];
-        %[azVec(j) elVec(j)]=get_satellite_az_el(xs, ys, zs, pos_rec);
+        [azVec(j) elVec(j)]=get_satellite_az_el(xs, ys, zs, pos_rec);
     end
+    elAz_t.azim=[[eph_t(:).sat]' azVec];
+    elAz_t.elev=[[eph_t(:).sat]' elVec];
+    elevAzim{end+1}=elAz_t;
     %Find the direction matrix from rec->sv
     G=directionMatrix(satPos, pos_rec);
     H=G(2:end,:)-G(1,:);
