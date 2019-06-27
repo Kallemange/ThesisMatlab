@@ -1,4 +1,4 @@
-function estRelPos(r1, r2, eph, pos_rec)
+function [tVec, HVec, elevAzim, rECEF, rECEF_weighted, DDVec ]= estRelPos(r1, r2, eph, pos_rec)
 %THROUGH THESE CALCULATIONS, ASSUME REC1 IS USED AS REFERENCE, R2 WILL BE 
 %CALCULATED AND INTERPOLATED WRT IT.
 %Estimate the relative position from raw data.
@@ -32,15 +32,21 @@ R=R2*R1;
 %Calculate the unit vector to the satellites
 rECEF=[];
 rNED=[];
+rECEF_weighted=[];
 eph=eph([eph(:).sat]<=32);
 D1Vec=zeros(89,10);
 D2Vec=zeros(89,10);
 DDVec=zeros(89,10);
+%DOP matrix
+HVec={};
 
 %Elevation and azimuth angle vectors
 elevAzim={};
-for i=1:1:10
+tVec=[];
+for i=1:100:10001
+    i
     t=unix2GPSTime(r1(i).ToW);
+    tVec(end+1)=t;
     t2_low=find([r2(:).ToW]<r1(i).ToW, 1, 'last');
     t2_high=find([r2(:).ToW]>r1(i).ToW, 1, 'first');
     w=findWeights(r1(i).ToW, r2(t2_low).ToW, r2(t2_high).ToW);
@@ -64,8 +70,9 @@ for i=1:1:10
         satPos(j,:)=[xs, ys, zs];
         [azVec(j) elVec(j)]=get_satellite_az_el(xs, ys, zs, pos_rec);
     end
-    elAz_t.azim=[[eph_t(:).sat]' azVec];
-    elAz_t.elev=[[eph_t(:).sat]' elVec];
+    elAz_t.sats = [eph_t(:).sat]';
+    elAz_t.azim = azVec;
+    elAz_t.elev = elVec;
     elevAzim{end+1}=elAz_t;
     %Find the direction matrix from rec->sv
     G=directionMatrix(satPos, pos_rec);
@@ -73,14 +80,18 @@ for i=1:1:10
     D1=r1_t.P(2:end)-r1_t.P(1);
     D2=[r2_low.P(2:end)-r2_low.P(1) r2_high.P(2:end)-r2_high.P(1)]*w';
     DD=D1-D2;
+    HVec{end+1}=H;
     r_ab=inv(H'*H)*H'*DD;
+    W=diag(((r1_t.SNR(2:end).^2).*(r2_low.SNR(2:end).^2))./((r1_t.SNR(2:end).^2)+(r2_low.SNR(2:end).^2)));
+    r_weighted=inv(H'*W*H)*H'*W*DD;
     rECEF(:,end+1)=r_ab;
+    rECEF_weighted(:,end+1)=r_weighted;
     rNED(:,end+1)=R*r_ab;
     D1Vec(satID, i)=D1; 
     D2Vec(satID, i)=D2;
     DDVec(satID, i)=DD;
 end
-plotOut=1;
+plotOut=0;
 if(plotOut)
     figure
     NED=['N', 'E', 'D'];
@@ -104,7 +115,7 @@ if(plotOut)
     plot(DDVec(DDidx,:)');
     xlabel('DD vector')
 end
-keyboard    
+
     
 %PART B3)
 %for j=1:length(eph_t)

@@ -1,4 +1,4 @@
-function [xVec tVec]=estGlobalPos(raw, eph, t_end, h, plotOut)
+function [xVec tVec, H]=estGlobalPos(raw, eph, t_end, h, plotOut)
 %Estimate global position from the raw data available in obsd_t and eph_t 
 %calculations based on those presented in telesens
 
