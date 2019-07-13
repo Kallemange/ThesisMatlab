@@ -22,6 +22,6 @@
 	eqn = E - eph.e*sin(E) == mk;
 	solx = vpasolve(eqn, E);
 	Ek = double(solx);
-
+    
 	dsv = eph.f0 + eph.f1*(t-eph.toc) + eph.f2*(t-eph.toc)^2 + F*eph.e*(eph.A^0.5)*sin(Ek);
 	end
