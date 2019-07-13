@@ -37,10 +37,10 @@ out.llaVec=[];
 out.tauVec=[];
 
 if nargin<4
-    t_end=5;
+    t_end=T;
 end
 if nargin<3
-    h=1;
+    h=5;
 end
 tVec=[raw(1:h:t_end).ToW];
 noSats=length(eph);
