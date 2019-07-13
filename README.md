@@ -5,3 +5,11 @@ Data can also be loaded from any of the .mat files available when running the Do
 Settings for what to do in that simulation can be adjusted in the sims-struct available in the SimSettings.m-file.
 ### Load sims to memory before the simulations are run.
 ### Load some raw data to memory before running simulations
+
+## To see the satellite trajectories etc
+*load allLData.m to memory
+*Open to meeting0701/meeting0701.m
+*Run either of the versions of estGlobalPos
+*Observe the satellite trajectories and compare
+
+
