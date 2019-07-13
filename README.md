@@ -7,9 +7,9 @@ Settings for what to do in that simulation can be adjusted in the sims-struct av
 ### Load some raw data to memory before running simulations
 
 ## To see the satellite trajectories etc
-*load allLData.m to memory
-*Open to meeting0701/meeting0701.m
-*Run either of the versions of estGlobalPos
-*Observe the satellite trajectories and compare
+- load allLData.m to memory
+- Open to meeting0701/meeting0701.m
+ -Run either of the versions of estGlobalPos
+- Observe the satellite trajectories and compare
 
 
