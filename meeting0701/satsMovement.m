@@ -109,3 +109,19 @@ plot(((x.tVec(1:length(vDOP))-x.tVec(1)))/60,vDOP);
 lineAtEach10min(t0, noLines, [0 max(vDOP)])
 xlabel("vDOP over time")
 
+figure(4)
+xyz='xyz';
+sgtitle(strcat("position ECEF, true position: ", num2str(posRecECEF)))
+for i=1:3
+    subplot(3,1,i)
+    plot(x.xVec(:,i))
+    xlabel(strcat(xyz(i),'-direction'))
+end
+figure(5)
+sgtitle(strcat("position lla, true position: ", num2str(posRec)))
+lla=["lon" "lat" "h"];
+for i=1:3
+    subplot(3,1,i)
+    plot(x.llaVec(:,i))
+    xlabel(strcat(lla(i),'-direction'))
+end
