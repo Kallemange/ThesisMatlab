@@ -74,18 +74,23 @@ hold on
 dist_min=2e7;
 dist_max=2.5e7;
 for i=1:length(x.satPos.pos)
+    
     xs=x.satPos.pos{i};
-    distance_sat_rec=vecnorm(xs(:,2:4)-posRecECEF, 2,2);
-    if min(distance_sat_rec)<dist_min
-        dist_min=min(distance_sat_rec);
+    if(~isempty(xs))
+        distance_sat_rec=vecnorm(xs(:,2:4)-posRecECEF, 2,2);
+        if min(distance_sat_rec)<dist_min
+            dist_min=min(distance_sat_rec);
+        end
+        if max(distance_sat_rec)>dist_max
+            dist_max=max(distance_sat_rec);
+        end
+        plot((xs(:,1)-t0_ToW)/60, distance_sat_rec);
     end
-    if max(distance_sat_rec)>dist_max
-        dist_max=max(distance_sat_rec);
-    end
-    plot((xs(:,1)-t0_ToW)/60, distance_sat_rec);
+        
 end
-lineAtEach10min(t0, noLines, [dist_min dist_max])
+lineAtEach10min(t0, noLines, [dist_min-1000 dist_max+1000])
 legend(string(num2str(legend2')), 'AutoUpdate','off');
+ylabel('Distance [m]')
 hold off
 
 figure(3)
