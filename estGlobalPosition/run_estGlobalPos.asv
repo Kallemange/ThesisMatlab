@@ -4,7 +4,7 @@
 %% Step 1 Load data to memory
 addpath('SatsMove/')
 addpath('../data');
-load allLogData.mat %Contains the raw log data organized in structs
+load allLogData.mat %Contains the raw ldata 
 load allEstPos.mat %Contains the positional estimate calculations already made
 %% Step 2 compute the position based on the observation and ephmeris data
 % 
