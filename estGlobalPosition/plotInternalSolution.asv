@@ -1,0 +1,24 @@
+function plotInternalSolution(path1, path2)
+%Function to provide plots of global positional fixes from the internal
+%solution of the receivers. Plots are showing:
+%1) Global position wrt the mean position of x1 in NED-frame
+%2) Radial distance over time between receivers
+%3) Distance in NED over time between receivers
+%IN
+%path [string], path [string] (optional)
+%OUT
+%N/A
+x1=readtable(path1);
+if nargin==2
+    x2=readtable(path2);
+end
+wgs84 = wgs84Ellipsoid;
+rec1.pos=ecef2ned(x1.ecef_0_, x1.ecef_1_, x1.ecef_2_,x1.lla_0_(1), x1.ll_1_(1);
+rec1.t=x1.ToWms;
+rec2.pos=[x2.ecef_0_ x2.ecef_1_ x2.ecef_2_];
+rec2.t=x2.ToWms;
+rec1.p
+
+
+hold on
+plot(rec2.t, rec2.pos(:,1));
