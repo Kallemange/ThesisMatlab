@@ -1,0 +1,7 @@
+Meeting 28/8
+
+Verifiera beteendet hos estimate_position.m mha simuleringar, i 3 steg
+1) Helt utan fel
+2) Fel i mottagarposition
+3) Klockfel
+4) Fel i beräknad satellitposition (flera sekunders fel)

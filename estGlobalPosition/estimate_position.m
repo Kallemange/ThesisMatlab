@@ -26,7 +26,7 @@
 		% delta pseudo range:
 		dp = pr - norms + b - b0;
 		G = [-(xs-x0)./norms ones(numSat,1)];
-		sol = inv(G'*G)*G'*dp;
+		sol = (G'*G)\(G'*dp);
 		dx = sol(1:dim)';
 		db = sol(dim+1);
 		norm_dp = norm(dp);
