@@ -1,0 +1,10 @@
+function obs=simulate_observation(posRec, Xsat, eps)
+%Create simulated observations from satellite and receiver positions, and a
+%noise term
+Xsat=Xsat+eps.satPos*randn(size(Xsat));
+posRec=posRec+eps.recPos*randn(size(posRec));
+pr=vecnorm(Xsat-posRec,2,2);
+pr=pr+eps.clockB*randn(eps(
+
+
+
