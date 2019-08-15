@@ -4,10 +4,21 @@ Verifiera beteendet hos estimate_position.m mha simuleringar, i 3 steg
 1) Helt utan fel
 2) Fel i mottagarposition
 3) Klockfel (ms)
-4) Fel i beräknad satellitposition (parameter/algoritmfel)
+4) Fel i beräknad satellitposition (slumpfel parameter/algoritmfel)
 5) Fel i beräknad satellitposition (klockfel UNIX->ToW conversion)
 
-Kolla konvergens baserat på olika fel i indata och plotta
+Kolla konvergens baserat på olika fel i indata och plotta KLAR
+
+Skall kolla hur konvergensen ser ut vid olika indata KLAR
+
+For a given type of input noise, an error will be produced in the output
+data. The behaviour is plotted in two kinds of graphs, investigating the
+error in position estimate and clock bias estimate.
+    1) How the error changes with an increasing error in input of given
+    noise type, as well as the clock bias estimate.
+    2) How the solution converges per iteration for both position and clock
+    bias estimate.
+
 %}
 %%
 addpath('../estGlobalPosition/')
@@ -16,36 +27,54 @@ addpath('../data');
 addpath('../Simulations/GlobalPosEstimate')
 load allLogData.mat
 load allEstPos.mat
-%%
-c=physconst('lightspeed');
-
+%% Testing the output of the simulations for different levels of input noise
 %Error terms to be included in the simulations
-eps.satPos=0; eps.recPos=0; eps.clockB=0; eps.gauss=0;
+in.eps.satPos=0; in.eps.recPos=0; in.eps.clockB=0; in.eps.gauss=0; in.eps.timeErr=0;
 %Positions of satellites and receivers
-pRec=[gpsData0706.ecef_0_(1) gpsData0706.ecef_1_(1) gpsData0706.ecef_2_(1)];
-pSat=satPositions(ephE, 0);
+in.pRec=[gpsData0706.ecef_0_(1) gpsData0706.ecef_1_(1) gpsData0706.ecef_2_(1)];
+in.eph=ephE;
+in.pSat=satPositions(in.eph, 0);
 %%
-figure(1)
-posError=[]; bError=[];
-%Receiver clock error 
-for i=0.001:-0.000002:0
-    eps.clockB=c*i;
-    pEst=test_estimate_position(pRec,pSat, eps);
-    posError(end+1)=norm(pRec-pEst);
-    bError(end+1)=eps.clockB;
-end
-eps.clockB=0;
-plot(bError/c*1000,posError)
-title("Error in position estimate as function of error in receiver clocktime")
-xlabel("clock error [ms]")
-ylabel("|true position-estimated position|")
-%%
-figure(2)
-posError=[]; posNoise=[];
-for i=[1:100 100:100:10000]
-    eps.recPos=i;
-    pEst=test_estimate_position(pRec,pSat,eps);
-    posError(end+1)=norm(pRec-pEst);
-    posNoise(end+1)=eps.recPos;
-end
-plot(posNoise, posError)
+% No noise 
+in.noise='noiseless';
+test_estimate_position(in);
+% Receiver clock error
+in.noise='clockB';
+test_estimate_position(in);
+% Satellite position error (gaussian)
+in.noise='satPos';
+test_estimate_position(in);
+% Satellite position error (time conversion)
+in.noise='clockErr';
+test_estimate_position(in);
+% Receiver positon error
+in.noise='recPos';
+test_estimate_position(in);
+% Gaussian noise
+in.noise='gauss';
+test_estimate_position(in);
+%% Testing the convergence of the simulations for different levels of input noise
+in.eps.satPos=0; in.eps.recPos=0; in.eps.clockB=0; in.eps.gauss=0; in.eps.timeErr=0;
+%Positions of satellites and receivers
+in.pRec=[gpsData0706.ecef_0_(1) gpsData0706.ecef_1_(1) gpsData0706.ecef_2_(1)];
+in.eph=ephE;
+in.pSat=satPositions(in.eph, 0);
+
+% No noise 
+in.noise='noiseless';
+test_estimate_position(in, 'convergence');
+% Receiver clock error
+in.noise='clockB';
+test_estimate_position(in,'convergence');
+% Satellite position error (gaussian)
+in.noise='satPos';
+test_estimate_position(in,'convergence');
+% Satellite position error (time conversion)
+in.noise='clockErr';
+test_estimate_position(in,'convergence');
+% Receiver positon error
+in.noise='recPos';
+test_estimate_position(in,'convergence');
+% Gaussian noise
+in.noise='gauss';
+test_estimate_position(in,'convergence');
