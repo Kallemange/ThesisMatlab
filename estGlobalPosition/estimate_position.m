@@ -1,4 +1,4 @@
-	function [x, b, norm_dp, G, xVec, bVec] = estimate_position(xs, pr, numSat, x0, b0, dim)
+	function [x, b, norm_dp, G, xVec, bVec] = estimate_position(xs, pr, numSat, x0, b0, dim, pres)
 	% estimate_position: estimate the user's position and user clock bias
 	% Usage: [x, b, norm_dp, G] = estimate_position(xs, pr, numSat, x0, b0, dim)
 	% Input Args: xs: satellite position matrix
@@ -8,6 +8,7 @@
 	%             x0: starting estimate of the user position
 	%             b0: starting point for the user clock bias
 	%             dim: dimensions of the satellite vector. 3 for 3D, 2 for 2D
+    %             pres (optional): precision, argument for when iteration stops
 	% Notes: b and b0 are usually 0 as the current estimate of the clock bias
 	% has already been applied to the input pseudo ranges.
 	% Output Args: x: optimized user position
@@ -22,10 +23,12 @@
 	norm_dp = 100;
 	numIter = 0;
 	b = b0;
-    
-    xVec=[]; bVec=[];
+    if nargin<7
+        pres=1e-3;
+    end    
+    xVec=x0; bVec=b0;
 	%while (norm_dp > 1e-4)
-	while norm(dx) > 1e-3
+	while norm(dx) > pres
 		norms = sqrt(sum((xs-x0).^2,2));
 		% delta pseudo range:
 		dp = pr - norms + b - b0;

@@ -11,6 +11,7 @@ Kolla konvergens baserat på olika fel i indata och plotta KLAR
 
 Skall kolla hur konvergensen ser ut vid olika indata KLAR
 
+TEST_ESTIMATE_POSITION:
 For a given type of input noise, an error will be produced in the output
 data. The behaviour is plotted in two kinds of graphs, investigating the
 error in position estimate and clock bias estimate.
@@ -19,22 +20,30 @@ error in position estimate and clock bias estimate.
     2) How the solution converges per iteration for both position and clock
     bias estimate.
 
+How to run:
+1) Load data
+2) Create starting positions for receiver and satellites
+3) Test the output of the simulations, either testing output or convergence
+as specified by providing argument 'convergence'
+
+%TEST_EST_GLOBAL_POS:
+
 %}
-%%
+%% Load Data
 addpath('../estGlobalPosition/')
 addpath('../estGlobalPosition/SatsMove/')
 addpath('../data');
 addpath('../Simulations/GlobalPosEstimate')
 load allLogData.mat
 load allEstPos.mat
-%% Testing the output of the simulations for different levels of input noise
-%Error terms to be included in the simulations
-in.eps.satPos=0; in.eps.recPos=0; in.eps.clockB=0; in.eps.gauss=0; in.eps.timeErr=0;
+%% Create the starting position and satellite positions 
 %Positions of satellites and receivers
 in.pRec=[gpsData0706.ecef_0_(1) gpsData0706.ecef_1_(1) gpsData0706.ecef_2_(1)];
 in.eph=ephE;
 in.pSat=satPositions(in.eph, 0);
-%%
+%Error terms to be included in the simulations
+in.eps.satPos=0; in.eps.recPos=0; in.eps.clockB=0; in.eps.gauss=0; in.eps.timeErr=0;
+%% Testing the output of the simulations for different levels of input noise
 % No noise 
 in.noise='noiseless';
 test_estimate_position(in);
@@ -54,15 +63,9 @@ test_estimate_position(in);
 in.noise='gauss';
 test_estimate_position(in);
 %% Testing the convergence of the simulations for different levels of input noise
-in.eps.satPos=0; in.eps.recPos=0; in.eps.clockB=0; in.eps.gauss=0; in.eps.timeErr=0;
-%Positions of satellites and receivers
-in.pRec=[gpsData0706.ecef_0_(1) gpsData0706.ecef_1_(1) gpsData0706.ecef_2_(1)];
-in.eph=ephE;
-in.pSat=satPositions(in.eph, 0);
-
 % No noise 
 in.noise='noiseless';
-test_estimate_position(in, 'convergence');
+test_estimate_position(in, 'convergence', 1e-9);
 % Receiver clock error
 in.noise='clockB';
 test_estimate_position(in,'convergence');
