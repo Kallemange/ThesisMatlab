@@ -39,8 +39,12 @@ load allEstPos.mat
 %% Create the starting position and satellite positions 
 %Positions of satellites and receivers
 in.pRec=[gpsData0706.ecef_0_(1) gpsData0706.ecef_1_(1) gpsData0706.ecef_2_(1)];
-in.eph=ephE;
-in.pSat=satPositions(in.eph, 0);
+eph=ephE;
+pSat=satPositions(eph, 0);
+[~,elev]=ecef2elaz(pSat,in.pRec);
+in.pSat=pSat(elev>10,:);
+in.eph=eph(elev>10);
+clearvars elev pSat eph;
 %Error terms to be included in the simulations
 in.eps.satPos=0; in.eps.recPos=0; in.eps.clockB=0; in.eps.gauss=0; in.eps.timeErr=0;
 %% Testing the output of the simulations for different levels of input noise

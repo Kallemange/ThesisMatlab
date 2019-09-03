@@ -60,21 +60,21 @@ switch in.noise
         figname='clockB';
     case 'recPos'
         noiseVec=linspace(0,1000,N);
-        noise_convergence=round(linspace(0,1000,N_conv));
+        noise_convergence=round(linspace(1,1000,N_conv));
         plotTitle="Error in position estimate as function of receiver position error";
         plotTitle_convergence="Convergence of estimate with receiver position error";
         label_x="receiver position error";
         figname='recPos';
     case 'satPos'
         noiseVec=linspace(0,1000, N);
-        noise_convergence=round(linspace(0,1000,N_conv));
+        noise_convergence=round(linspace(1,1000,N_conv));
         plotTitle="Error in position estimate as function of satellite position error";
         plotTitle_convergence="Convergence of estimate with satellite position error";
         label_x="satellite position error";
         figname='satPos';
     case 'gauss'
-        noiseVec=linspace(0,1000, N);
-        noise_convergence=round(linspace(0,1000,N_conv));
+        noiseVec=linspace(1,1000, N);
+        noise_convergence=round(linspace(1,1000,N_conv));
         plotTitle="Error in position estimate as function of a random noise";
         plotTitle_convergence="Convergence of estimate with added random noise";
         label_x="random noise magnitude";
@@ -126,10 +126,13 @@ if (nargin<2||~strcmp(convergence, 'convergence'))
     subplot(2,1,1)
     hold on
     if any(noiseVec~=0)
-        plot(noiseVec,deltaPVec)
-        plot(noiseVec,deltaYVec)
-        plot(noiseVec,mseVec)
-        legend("|x_{est}-x_{true}|", "|y-f(\theta)|", "(\Sigma(y-y_{pred})^2)/n");
+        plot(noiseVec(2:end),deltaPVec(2:end))
+        plot(noiseVec(2:end),deltaYVec(2:end))
+        plot(noiseVec(2:end),mseVec(2:end))
+        legend("$|\textbf{p}-\hat{\textbf{p}}|$",...
+               "$|\theta-\hat{\theta}|$", ...
+               "$\frac{1}{n}\Sigma(y-\hat{y})^2$",...
+               'Interpreter', 'latex');
         %semilogy(noiseVec,deltaPVec)
     else
         plot(1:N,deltaPVec)
@@ -181,7 +184,7 @@ elseif strcmp(convergence, 'convergence')
         leg=legend(strsplit(string(num2str(10.^[1:N_conv], "%10.0e"))));
         title(leg,"starting position")
     else
-        leg=legend(num2str(noise_convergence'));
+        leg=legend(num2str(noise_convergence', "%10.1e"));
         title(leg, "noise magnitude")
     end
     if saveToFile
