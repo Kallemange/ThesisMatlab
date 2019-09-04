@@ -1,4 +1,14 @@
 function obs=simulate_observation(in)
+%IN
+%in struct with (relevant fields)
+%   eps, struct with noise types:
+%       satPos:                     Satellite position error
+%       recPos:                     Receiver position error
+%       clockB:                     Receiver clock bias
+%       gauss:                      Measurement white noise 
+%OUT
+%obs, double[n]:                    Vector with observations (pseudorange)
+
 %Create simulated observations from satellite true position and receiver
 %positions, and a noise term
 
@@ -11,7 +21,7 @@ dist=vecnorm(Xsat-posRec,2,2);
 %Noise in observation due to receiver clock bias [m]
 obs=dist+in.eps.clockB*randn(1);
 %Gaussian noise
-obs=obs+in.eps.gauss;
+obs=obs+in.eps.gauss*randn(size(obs));
 
 end
 
