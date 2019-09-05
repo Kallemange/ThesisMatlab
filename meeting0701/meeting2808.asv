@@ -41,7 +41,7 @@ load allEstPos.mat
 in.pRec=[gpsData0706.ecef_0_(1) gpsData0706.ecef_1_(1) gpsData0706.ecef_2_(1)];
 eph=ephE;
 pSat=satPositions(eph, 0);
-[~,elev]=ecef2elaz(pSat,in.pRec)
+[~,elev]=ecef2elaz(pSat,in.pRec);
 in.pSat=pSat(elev>10,:);
 in.eph=eph(elev>10);
 clearvars elev pSat eph;
@@ -85,3 +85,7 @@ test_estimate_position(in,'convergence');
 % Gaussian noise
 in.noise='gauss';
 test_estimate_position(in,'convergence');
+%% New plots over relative position from internal solution
+T1='../Logs
+plotInternalSolution(
+

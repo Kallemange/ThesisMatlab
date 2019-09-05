@@ -40,7 +40,7 @@ function test_estimate_position(in, convergence, pres, saveToFile)
 
 %Number of steps in iteration for final estimat and convergence order
 if nargin<4
-    saveToFile=0;
+    saveToFile=1;
 end
 if nargin<3
     pres=1e-3;
@@ -172,7 +172,13 @@ elseif strcmp(convergence, 'convergence')
         [~, ~,~,~,xVec,bVec]=estimate_position(in.pSat, pr, length(pr),x0, 0, 3, pres);
         hold on
         if strcmp(in.noise, 'clockB')
-            plotClockB(xVec, bVec, in);
+            subplot(211)
+            hold on
+            posError=vecnorm(xVec-in.pRec,2,2);
+            plot(posError)
+            subplot(212)
+            clockError=abs(bVec-in.eps.clockB);
+            plot(clockError)
         else            
             posError=vecnorm([xVec bVec']-[in.pRec in.eps.clockB] ,2,2);
             plot(posError')
@@ -183,14 +189,13 @@ elseif strcmp(convergence, 'convergence')
         subplot(211)
         set(gca,'YScale','log')
         xlabel("#iteration")
-        ylabel('$|\textbf{p}-\hat{\textbf{p}}|$', 'Interpreter', 'latex');
+        ylabel('$|\textbf{p}-\hat{textbf{p}}$|', 'Interpreter', 'latex');
         leg=legend(strsplit(string(num2str(10.^[1:N_conv], "%10.0e"))));
         title(leg,"starting position")
         subplot(212)
-        hold on
         set(gca,'YScale','log')
         xlabel("#iteration")
-        ylabel('$|\Delta t-\Delta\hat{t}|$', 'Interpreter', 'latex');
+        ylabel('$|\Delta_t-\Delta\hat{t}|$', 'Interpreter', 'latex');
     else
         set(gca,'YScale','log')
         xlabel("#iteration")
@@ -210,15 +215,3 @@ elseif strcmp(convergence, 'convergence')
     end
 end
 
-end
-
-
-function plotClockB(xVec, bVec, in)
-    subplot(211)
-    hold on
-    posError=vecnorm(xVec-in.pRec,2,2);
-    plot(posError)
-    subplot(212)
-    clockError=abs(bVec-in.eps.clockB);
-    plot(clockError)
-end

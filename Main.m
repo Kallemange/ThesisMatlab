@@ -51,6 +51,7 @@ relativeGPSPosINS(T1,T2, 'lla', 1, 1.6);
 T2=readtable('Uggleviken0411/E1/Ins.csv');
 T1=readtable('Uggleviken0411/E2/Ins.csv');
 %%
+addpath('Old functions\')
 relativeGPSPosINS(T1,T2, 'ned', 1, 10, 2);
 %% Measurements from INS-log with receivers aligned in N-direction 10 m
 T2=readtable('Uggleviken0411/N1/Ins.csv');

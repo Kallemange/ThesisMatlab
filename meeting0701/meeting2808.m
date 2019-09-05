@@ -69,7 +69,7 @@ test_estimate_position(in);
 %% Testing the convergence of the simulations for different levels of input noise
 % No noise 
 in.noise='noiseless';
-test_estimate_position(in, 'convergence', 1e-9);
+test_estimate_position(in, 'convergence', 1e-8);
 % Receiver clock error
 in.noise='clockB';
 test_estimate_position(in,'convergence');
@@ -85,3 +85,18 @@ test_estimate_position(in,'convergence');
 % Gaussian noise
 in.noise='gauss';
 test_estimate_position(in,'convergence');
+%% New plots over relative position from internal solution
+close all
+log_path='../Logs/Uggleviken0706';
+%True distance between receivers
+trueD=10; 
+%True direction between receivers
+direction='E';
+%Logs to use for calculations
+T1=strcat(log_path,'/',direction,'1/gps.csv');
+T2=strcat(log_path,'/',direction,'2/gps.csv');
+plotInternalSolution(T1,T2, trueD, direction, false);
+direction='N';
+T1=strcat(log_path,'/',direction,'1/gps.csv');
+T2=strcat(log_path,'/',direction,'2/gps.csv');
+plotInternalSolution(T1,T2, trueD, direction, false);
