@@ -1,4 +1,4 @@
-function test_estimate_position(in, convergence, pres, saveToFile)
+function test_estimate_position(in, convergence, pres, saveToFile, format)
 %IN:
 % in, struct:                       All indata, containing fields:
 %      p, double[3]:                True position of receiver in ECEF (from internal solution of receiver)
@@ -41,6 +41,7 @@ function test_estimate_position(in, convergence, pres, saveToFile)
 %Number of steps in iteration for final estimat and convergence order
 if nargin<4
     saveToFile=0;
+    format='fig';
 end
 if nargin<3
     pres=1e-3;
@@ -52,7 +53,8 @@ c=299792458;
 label_y="estimate error magnitude";
 switch in.noise
     case 'clockB'
-        noiseVec=c*linspace(0,10e-3, N);
+        noiseMag=c*linspace(0,10e-3, N);
+        noiseVec=randn(size(noiseMag)).*noiseMag;
         noise_convergence=round(c*10.^linspace(-7,-3, N_conv));
         plotTitle="Error in position estimate as a function of receiver clock bias";
         plotTitle_convergence="Convergence of estimate with receiver clock bias";
@@ -86,6 +88,14 @@ switch in.noise
         plotTitle_convergence="Convergence of estimate as function of time conversion error";
         label_x="Time shift [s]";
         figname='clockErr';
+    case 'mixedNoise'
+        noiseVec=10.^[-10:4];
+        noise_convergence=10.^(-10:2:5);
+        plotTitle="Error in position and clock bias with noise present in both parameters";
+        plotTitle_convergence=[{"Error in position and clock bias estimate with noise present"} ...
+                                {"in both parameters initial value"}];
+        figname="mixedNoise";
+        
     otherwise
         plotTitle="Positional estimate error using noise free data"; 
         plotTitle_convergence="Convergence of estimate using a noise free measurement";
@@ -107,13 +117,13 @@ if (nargin<2||~strcmp(convergence, 'convergence'))
 
     for i=1:length(noiseVec)
         in.eps.(in.noise)=noiseVec(i);
-        pr=simulate_observation(in);
+        [pr Xsat]=simulate_observation(in);
         if strcmp(in.noise, 'clockErr')
             in.pSat=satPositions(in.eph, in.eps.(in.noise));
         end
         %Estimate position using receiver observations and calculated positions of
         %the satellites
-        [p_est, bVec(end+1)]=estimate_position(in.pSat, pr, length(pr), x0,0, 3);
+        [p_est, bVec(end+1)]=estimate_position(Xsat, pr, length(pr), x0,0, 3);
         deltaPVec(end+1)=norm(p_est-in.pRec);
         deltaYVec(end+1)=norm([p_est-in.pRec bVec(end)-in.eps.clockB]);
         %Calculate the expected value of the measurement with given
@@ -126,9 +136,15 @@ if (nargin<2||~strcmp(convergence, 'convergence'))
     subplot(2,1,1)
     hold on
     if any(noiseVec~=0)
-        plot(noiseVec(2:end),deltaPVec(2:end))
-        plot(noiseVec(2:end),deltaYVec(2:end))
-        plot(noiseVec(2:end),mseVec(2:end))
+        if strcmp(in.noise, 'clockB')
+            plot(noiseMag(2:end),deltaPVec(2:end))
+            plot(noiseMag(2:end),deltaYVec(2:end))
+            plot(noiseMag(2:end),mseVec(2:end))
+        else
+            plot(noiseVec(2:end),deltaPVec(2:end))
+            plot(noiseVec(2:end),deltaYVec(2:end))
+            plot(noiseVec(2:end),mseVec(2:end))
+        end
         legend("$|\textbf{p}-\hat{\textbf{p}}|$",...
                "$|\theta-\hat{\theta}|$", ...
                "$\frac{1}{n}\Sigma_{i=1}^n (y^{(i)}-\hat{y}^{(i)})^2$",...
@@ -144,22 +160,36 @@ if (nargin<2||~strcmp(convergence, 'convergence'))
     ylabel(label_y)
     set(gca,'YScale','log')
     subplot(2,1,2)
-    plot(noiseVec, bVec*1000/c)
+    if strcmp(in.noise, 'clockB')
+        plot(noiseMag, bVec*1000/c, 'LineWidth', 4.0)
+        hold on
+        plot(noiseMag, noiseVec*1000/c)
+        leg=legend("$\Delta \hat{t}$", "$\Delta t$", 'Interpreter', 'latex');
+        title(leg,"Clock bias")
+    else
+        plot(noiseVec, bVec*1000/c)
+    end
     %semilogy(noiseVec, bVec*1000/c)
     ylabel("Estimated clock bias [ms]")
     xlabel("noise magnitude")
     %set(gca,'YScale','log')
     if saveToFile
-        saveas(fig, strcat('Figures/',figname), 'epsc')
+        saveas(fig, strcat('Figures/',figname), format)
     end
 
 elseif strcmp(convergence, 'convergence')
     fig=figure;
     %Start value for noisy estimates
     x0=[0,0,0];
+    b0=0;
     for i=1:length(noise_convergence)
-        in.eps.(in.noise)=noise_convergence(i);
-        pr=simulate_observation(in);
+        if strcmp(in.noise, 'mixedNoise')
+            in.eps.clockB=randn(1)*noise_convergence(i);            
+            x0=in.pRec+randn(1,3)*noise_convergence(i);
+        else
+            in.eps.(in.noise)=noise_convergence(i);
+        end
+        [pr, Xsat]=simulate_observation(in);
         if strcmp(in.noise, 'clockErr')
             in.pSat=satPositions(in.eph, in.eps.(in.noise));
         end
@@ -168,18 +198,27 @@ elseif strcmp(convergence, 'convergence')
         %directions, this seems convergent for any value <10e7
         if strcmp(in.noise, 'noiseless')
             x0=in.pRec-randn(1,3)*10^i;
+        elseif strcmp(in.noise, 'recPos')
+            b0=1e-15;
         end
-        [~, ~,~,~,xVec,bVec]=estimate_position(in.pSat, pr, length(pr),x0, 0, 3, pres);
+        
+        [~, ~,~,~,xVec,bVec]=estimate_position(Xsat, pr, length(pr),x0, b0, 3, pres);
         hold on
+        %Adding some special cases for the plots, to show the convergence
+        %of clock bias
         if strcmp(in.noise, 'clockB')
             plotClockB(xVec, bVec, in);
+        elseif strcmp(in.noise, 'recPos')
+            plotClockB(xVec, bVec, in);
+        elseif strcmp(in.noise, 'mixedNoise')
+            plotMixedNoise(xVec, bVec, in, pr);
         else            
             posError=vecnorm([xVec bVec']-[in.pRec in.eps.clockB] ,2,2);
             plot(posError')
         end
     end
     sgtitle(plotTitle_convergence);
-    if strcmp(in.noise, 'clockB')
+    if strcmp(in.noise, 'clockB' )
         subplot(211)
         set(gca,'YScale','log')
         xlabel("#iteration")
@@ -191,6 +230,31 @@ elseif strcmp(convergence, 'convergence')
         set(gca,'YScale','log')
         xlabel("#iteration")
         ylabel('$|\Delta t-\Delta\hat{t}|$', 'Interpreter', 'latex');
+    elseif strcmp(in.noise, 'recPos')
+        subplot(211)
+        set(gca,'YScale','log')
+        xlabel("#iteration")
+        ylabel('$|\textbf{p}-\hat{\textbf{p}}|$', 'Interpreter', 'latex');
+        leg=legend(strsplit(string(num2str(10.^[1:N_conv], "%10.0e"))));
+        title(leg,"noise magnitude")
+        subplot(212)
+        hold on
+        set(gca,'YScale','log')
+        xlabel("#iteration")
+        ylabel('$|\Delta t-\Delta\hat{t}|$', 'Interpreter', 'latex');
+    elseif strcmp(in.noise, 'mixedNoise')
+        subplot(211)
+        set(gca, 'YScale', 'log')
+        xlabel('#iteration')
+        ylabel('$|\theta-\hat{\theta}|$', 'Interpreter', 'latex');
+        leg=legend(strsplit(string(num2str(noiseVec, "%10.0e"))));
+        title(leg,"noise magnitude")
+        subplot(212)
+        set(gca, 'YScale', 'log')
+        hold on
+        xlabel("#iteration")
+        ylabel("$\frac{1}{n}\Sigma_{i=1}^n (y^{(i)}-\hat{y}^{(i)})^2$",...
+               'Interpreter', 'latex');
     else
         set(gca,'YScale','log')
         xlabel("#iteration")
@@ -206,7 +270,7 @@ elseif strcmp(convergence, 'convergence')
         title(leg, "noise magnitude")
     end
     if saveToFile
-        saveas(fig, strcat('Figures/',figname, 'Conv'), 'epsc')
+        saveas(fig, strcat('Figures/',figname, 'Conv'), format)
     end
 end
 
@@ -214,11 +278,35 @@ end
 
 
 function plotClockB(xVec, bVec, in)
+%Special case of plot to split plot in two subplots to show how position
+%and clockbias converges 
     subplot(211)
     hold on
     posError=vecnorm(xVec-in.pRec,2,2);
     plot(posError)
     subplot(212)
+    hold on
     clockError=abs(bVec-in.eps.clockB);
     plot(clockError)
+end
+
+function plotMixedNoise(xVec, bVec, in, pr)
+%Special case mixed noise initial values in both position and clock bias
+%to show that estimation converges for both position and clock bias
+    subplot(211)
+    hold on
+    posError=vecnorm([xVec bVec']-[in.pRec in.eps.clockB] ,2,2);
+    plot(posError)
+    subplot(212)
+    hold on
+    mseVec=[];
+    for i=1:length(bVec)
+        %Calculate the expected value of the measurement with given
+        %estimates of receiver position and clock bias
+        y_pred=vecnorm(in.pSat-xVec(i,:),2,2)+bVec(i);
+        %And calculate the mean square error of expected and measured value
+        mseVec(end+1)=sum((pr-y_pred).^2)/length(y_pred);
+    end
+    plot(mseVec)
+    
 end

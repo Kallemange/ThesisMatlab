@@ -68,7 +68,9 @@ obsVec.t=[];
 
 dsv = zeros(size(eph));
 for i=1:h:t_end
-    ['iteration:'    num2str(i)]
+    if mod(i,100)==1
+        ['iteration:'    num2str(i)]
+    end
     %Time is converted from posix (seconds since 1970) to ToW used in GPS
     %to get alignment. 
     [~, t]=UTC_in_sec2GPStime(raw(i).ToW);
