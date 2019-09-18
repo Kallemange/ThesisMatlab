@@ -4,6 +4,10 @@
 	% Input Args: coordinates in ECEF
 	% Output Args: Longitude, Latitude in radians, height in meters
 
+
+=======
+ 
+>>>>>>> debugging_global_pos
 	% WGS ellipsoid params
 	a = 6378137;
 	f = 1/298.257;
@@ -12,6 +16,10 @@
 	lambda = atan2(y,x);
 	p = sqrt(x^2+y^2);
 
+
+=======
+ 
+>>>>>>> debugging_global_pos
 	% initial value of phi assuming h = 0;
 	h = 0;
 	phi = atan2(z, p*(1-e^2)); %4.A.5

@@ -30,7 +30,7 @@ sets.plots.hist=1;              %Histogram over estimate distribution
 sets.plots.histPerDir=0;        %Histogram over estimat per direction
 sets.plots.cov=0;               %Covariance matrix satellite-readings 
 sets.plots.posOverT=0;          %Position over time estimate
-sets.plots.distOverT=0;         %Distance over time
+sets.plots.distOverT=1;         %Distance over time
 sets.plots.residual=0;          %Residual over reconstruction errors
 sets.plots.var= @(x) (var(x));  
 

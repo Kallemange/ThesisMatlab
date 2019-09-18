@@ -1,4 +1,0 @@
-_ID_,baroTemp,genFaultCode,hdwStatus,imuPeriodMs,imuTemp,insStatus,mcuTemp,navPeriodMs,reserved1,reserved2[0],reserved2[1],reserved2[2],reserved2[3],timeOfWeekMs
-4940,50.9060326,0,1114123,1,52.9356918,415302656,0,4,0,0,0,0,0,1530057
-10679,50.8708839,0,1114123,1,52.9130402,415302656,0,4,0,0,0,0,0,1540093
-16413,50.8156548,0,1114115,1,52.8557091,415302656,0,4,0,0,0,0,0,1550077

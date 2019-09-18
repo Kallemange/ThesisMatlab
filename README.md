@@ -1,7 +1,11 @@
 # ThesisMatlab
 Matlab project for estimating satellite positions from raw data
-## The main file contains several computations. Only the ones of interest should be run and not all in order. 
-Data can also be loaded from any of the .mat files available when running the Double difference simulations
-Settings for what to do in that simulation can be adjusted in the sims-struct available in the SimSettings.m-file.
-### Load sims to memory before the simulations are run.
-### Load some raw data to memory before running simulations
+# Look at the file meeting0701/meeting0701.m
+## To see the satellite trajectories etc
+Only execute step 1 and step 3, for the desired log
+- load allLData.m to memory
+ -Run either of the versions of estGlobalPos
+- Observe the satellite trajectories and compare with data from 
+gnssplanning.com
+
+

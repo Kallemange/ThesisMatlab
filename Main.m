@@ -51,6 +51,7 @@ relativeGPSPosINS(T1,T2, 'lla', 1, 1.6);
 T2=readtable('Uggleviken0411/E1/Ins.csv');
 T1=readtable('Uggleviken0411/E2/Ins.csv');
 %%
+addpath('Old functions\')
 relativeGPSPosINS(T1,T2, 'ned', 1, 10, 2);
 %% Measurements from INS-log with receivers aligned in N-direction 10 m
 T2=readtable('Uggleviken0411/N1/Ins.csv');
@@ -82,7 +83,9 @@ dir =' D';
 %}
 %% Load all data from logfiles
 dir =' N'; addpath rSatRawData\;
-[sat1 sat2 raw1 raw2] = rSatRawData('Uggleviken0411/','N');
+path="Logs/";
+date="Uggleviken0411/";
+[sat1 sat2 raw1 raw2] = rSatRawData(path+date,"N");
 %%
 dir =' E'; addpath rSatRawData\;
 [sat1 sat2 raw1 raw2] = rSatRawData('Uggleviken0411/','E');
@@ -91,6 +94,11 @@ dir =' E'; addpath rSatRawData\;
 %load('10mN')
 %load('10mE')
 dir =' E'; addpath rSatRawData\;
+%%
+dir =' N'; addpath rSatRawData\;
+path="Logs/";
+date="Uggleviken0706/";
+[sat1 sat2 raw1 raw2] = rSatRawData(path+date,"N");
 %% My own simulated data
 addpath simulateRawData\;
 dir='N'
@@ -109,13 +117,17 @@ t0=1.555058801792000e+09;
 %IN satellite data[2], raw data[2]
 %OUT pseudo range distance between reciever ab, unit vector to satellites
 addpath estDFromPr\;
+'Estimating D'
 [D u]                 = estDFromPr(sat1,sat2, raw1, raw2, sets);
+
 % Estimate the relative position from the pr-measurements
 %Optimal solution calculated as inv(H'H)H'D for (x,y,z)
 %IN pseudorange distance, directions to satellites
 %OUT time since start, distance in xyz, clock-drift over time
 
 addpath optimalSolPr\;
+'optimalSol'
 [tVec, r_ab, res, Sigma]         = optimalSolPr(D,u, sets); 
+
 % Plot the results 
 plotResultPr(r_ab,tVec, res, Sigma, dir, sets)

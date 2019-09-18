@@ -67,11 +67,8 @@
 	mk = eph.M0 + n*tk;
 
 	% solve for eccentric anomaly
-	syms E;
-	eqn = E - eph.e*sin(E) == mk;
-	solx = vpasolve(eqn, E);
-	Ek = double(solx);
-
+    Ek =keplerEq(mk,eph.e,10e-6);
+    %toc(tstart)
 	% True anomaly:
 	nu = atan2((sqrt(1-eph.e^2))*sin(Ek)/(1-eph.e*cos(Ek)), (cos(Ek)-eph.e)/(1-eph.e*cos(Ek)));
 	Ek = acos((eph.e  + cos(nu))/(1+eph.e*cos(nu)));
@@ -103,4 +100,18 @@
 	y = x_prime*sin(omega) + y_prime*cos(i)*cos(omega);
 	z = y_prime*sin(i);
 
-	end
+    end
+    
+    function E = keplerEq(M,e,eps)
+% from https://se.mathworks.com/matlabcentral/fileexchange/39896-kepler-s-equation-solver
+% Function solves Kepler's equation M = E-e*sin(E)
+% Input - Mean anomaly M [rad] , Eccentricity e and Epsilon 
+% Output  eccentric anomaly E [rad]. 
+   	En  = M;
+	Ens = En - (En-e*sin(En)- M)/(1 - e*cos(En));
+	while ( abs(Ens-En) > eps )
+		En = Ens;
+		Ens = En - (En - e*sin(En) - M)/(1 - e*cos(En));
+	end;
+	E = Ens;
+    end

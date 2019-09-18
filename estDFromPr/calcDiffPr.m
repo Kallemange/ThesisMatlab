@@ -5,6 +5,7 @@ function dPr=calcDiffPr(r1,r2,t1,t2, s1, t0, t_max)
 
 t1idx   =t1(1):t1(end);
 for i=1:length(t1idx)
+ 
     try
         %With r1 as reference, find the closest r2 readings
         raw1                   = r1(t1idx(i));

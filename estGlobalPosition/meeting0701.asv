@@ -1,0 +1,75 @@
+%Vi kör 4 ggr, i N1 och N2, sedan i E1 och E2 och även från ROS
+
+
+load('../10mN.mat', 'raw1', 'raw2');
+eph1=readEphDataFromFile('N1/raw2.csv');
+%%
+x1N=estGlobalPos(raw1, eph1, 1, 1000);
+x2N=estGlobalPos(raw2, eph1, 1, 1000);
+%%
+load('../10mE.mat', 'raw1', 'raw2');
+eph2=readEphDataFromFile('E1/raw2.csv');
+%%
+x1E=estGlobalPos(raw1, eph2, 100, 1001);
+x2E=estGlobalPos(raw2, eph2, 100, 1001);
+%%
+rawRos=readRawDataFromBagFile('gps_raw-gps-obs.csv');
+ephRos=readEphDataFromBagFile('gps_raw-gps-eph.csv');
+%%
+x1Ros=estGlobalPos(rawRos, ephRos, 1,1000);
+%%
+path='../Logs/Uggleviken0706/';
+%gpsData=readtable(strcat(path,'E1/gps.csv'));
+raw1=readRawDataToFile(strcat(path, 'E1/raw1.csv'));
+%%
+eph=readEphDataFromFile(strcat(path, 'E1/raw2.csv'))
+
+
+
+%% Ta fram data över satelliternas rörelse över himlen vid de givna tillfällena 
+% för referens mot datan som finns i https://www.gnssplanning.com/#/settings
+
+%För data 0706 datetime är UTC+2h (kl. 15->kl 17 på in-the-sky)
+
+
+%Transformera positionerna i ECEF till positioner i NED till elev-azim
+close all
+addpath('SatsMove\')
+GPSsats=x.satID(x.satID<=32);
+posRec=[gpsData.lla_0_(1) gpsData.lla_1_(1), gpsData.lla_2_(1)];
+ax=polaraxes;
+%ax.ThetaDir='clockwise';
+ax.ThetaZeroLocation='top';
+ax.RDir='reverse';
+rticks(ax, [0:10:90])
+hold on
+clear satPosElAz
+satPosElAz.el={};
+satPosElAz.az={};
+satPosElAz.ID=[];
+satPosElAz=repmat(satPosElAz,length(GPSsats),1);
+satLegend=num2str(x.satID([x.satID<=32]));
+for i=1:length(GPSsats)
+    xs=x.satPos.pos{i};   
+    if(~isempty(xs))
+        [azVec, elVec, r]=ecef2elaz([xs(:,2), xs(:,3), xs(:,4)], posRec);
+        text(deg2rad(azVec(1))+0.1,elVec(1)+0.1,satLegend()
+        if(any(el)<0)
+            keyboard
+        end
+
+    else
+        azVec(end+1)=0;
+        elVec(end+1)=0;
+    end
+        if x.satID(i)<=32
+            polarplot(deg2rad(azVec), elVec);
+        end
+
+        hold on
+end
+
+polarplot(0,90)
+legend(num2str(satLegend))
+
+%[satIDVec' azVec' elVec']
