@@ -3,13 +3,12 @@ function [tVec, r_ab]=optimalSolPr(D, eph, sets)
 %weighted matrix solution including a covariance matrix
 %IN:
 %D          STRUCT ARRAY, with difference calculations between rec_a and rec_b
+%eph,       ephemeris data for satellites to calculate the position
 %OUT:
 %tVec,      ARRAY, time [s] since startup
 %r_ab,      ARRAY[2D], momentary position estimates from optimal solution of pr
 %residual,  ARRAY[2D], reconstruction error per satellite measurement
 
-
-Sigma=0;
 %Max value of the distance vector
 i_max=size(D,2);
 %Distance vector
@@ -24,6 +23,10 @@ residual    = zeros(200,length(D));
 %refSatId=chooseRefSatGPSOnly(persistentSats, D);
 
 for i=1:length(D)
+    if size(D(i).sat, 1)<4
+        continue
+    end
+    keyboard
     %try
     %Find which u to use (latest arrival wrt the raw data)
     j=find([u.ToW]-u(1).ToW<=D(i).ToW, 1, 'last');
@@ -77,7 +80,7 @@ for i=1:length(D)
     
     tVec(i)=D(i).ToW;
 end
-Sigma=calcCovariance(residual);
+%Sigma=calcCovariance(residual);
 end
 
 

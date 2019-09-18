@@ -1,4 +1,4 @@
-function dPr=calcDiffPr(r1,r2,t1, t0)
+function dPr=calcDiffPr(r1,r2,t1)
 %Calculation of the difference in pseudorange per each measurement
 %IN raw data[2], valid times indices[2], satellite info
 %OUT struct-array with pseudorange difference, satID, ToW
@@ -26,8 +26,8 @@ for i=t1(1):t1(2)
         [~, i1, i2]            = intersect(raw1.data.sat, raw2.data.sat);
         dPr(i).dp              = raw1.data.P(i1)-raw2.data.P(i2);
         dPr(i).sat             = raw1.data.sat(i1);
-        dPr(i).ToW             = raw1.ToW-t0; 
-        dPr(i).SNR             = [raw1.data.SNR(i1) raw2.data.SNR(i2)];
+        dPr(i).ToW             = raw1.ToW; 
+        %dPr(i).SNR             = [raw1.data.SNR(i1) raw2.data.SNR(i2)];
 
     catch EM
         keyboard

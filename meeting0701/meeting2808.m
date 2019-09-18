@@ -163,15 +163,18 @@ SimSettings;
 %IN satellite data[2], raw data[2]
 %OUT pseudo range distance between reciever ab, unit vector to satellites
 addpath estDFromPr\;
-D                 = estDFromPr(raw1, raw2, sets);
+[t1raw, ~, t0r]     = findFirstLast(raw1, raw2);
+t1idx   =t1raw(1):t1raw(end);
+D=calcDiffPr(raw1,raw2,t1raw);
 %%
+
 % Estimate the relative position from the pr-measurements
 %Optimal solution calculated as inv(H'H)H'D for (x,y,z)
 %IN pseudorange distance, directions to satellites
 %OUT time since start, distance in xyz, clock-drift over time
 
 addpath optimalSolPr\;
-[tVec, r_ab, res, Sigma]         = optimalSolPr(D,u, sets); 
+[tVec, r_ab]         = optimalSolPr(D,eph1, sets); 
 
 % Plot the results 
 plotResultPr(r_ab,tVec, res, Sigma, dir, sets)
