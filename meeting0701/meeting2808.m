@@ -130,15 +130,47 @@ addpath('SatsMove/')
 addpath('../data');
 load allLogData.mat %Contains the raw log data organized in structs
 load allEstPos.mat %Contains the positional estimate calculations already made
-%% Step 2 compute the position based on the observation and ephmeris data
+% Step 2 compute the position based on the observation and ephmeris data
 % 
 %true position given by pRec as internal solution of E1_0706
 pRec=[gpsData0706.ecef_0_(1) gpsData0706.ecef_1_(1) gpsData0706.ecef_2_(1)];
-compare_obs_sat_pos(raw1E_0706,ephE_0706,pRec, 1);
-compare_obs_sat_pos(raw1E_0706,ephE_0706,pRec, 2);
-compare_obs_sat_pos(raw1E_0706,ephE_0706,pRec, 3);
-compare_obs_sat_pos(raw1E_0706,ephE_0706,pRec, 4);
-compare_obs_sat_pos(raw1E_0706,ephE_0706,pRec, 5);
-%x1E_0706  = estGlobalPos(raw1E_0706(2), ephE_0706, 1);
-% x1N       = estGlobalPos(raw1N, ephN, 1, 100);
-%x1Ros=estGlobalPos(rawRos, ephRos)
+%Following 5 versions are run, using the input argument i
+%   V1: No clock bias is taken into account, but clock bias is estimated 
+% from minimizing value of |y-y_hat| (y: observation, y_hat: expected observation |p-p_rec|)
+%   V2: Satellite clock bias is estimated and taken into account (added)
+%   V3: Receiver clock bias is taken into account
+%   V4: Satellite and receiver clock bias is taken into account
+%   V5: Satellite position is estimated over long time and compared to
+%   observation.
+for i=1:5
+compare_obs_sat_pos(raw1E_0706,ephE_0706,pRec, i);
+end
+
+%% Part 4 
+%Compute relative position from observation data and own 
+%calculation of satellite position
+%% Read data from logfiles
+dir =' N'; addpath rSatRawData\;
+path="Logs/";
+date="Uggleviken0706/";
+[sat1 sat2 raw1 raw2] = rSatRawData(path+date,"N");
+%%
+
+% Calculate distance from pseudorange measurements
+%IN satellite data[2], raw data[2]
+%OUT pseudo range distance between reciever ab, unit vector to satellites
+addpath estDFromPr\;
+[D u]                 = estDFromPr(sat1,sat2, raw1, raw2, sets);
+
+% Estimate the relative position from the pr-measurements
+%Optimal solution calculated as inv(H'H)H'D for (x,y,z)
+%IN pseudorange distance, directions to satellites
+%OUT time since start, distance in xyz, clock-drift over time
+
+addpath optimalSolPr\;
+'optimalSol'
+[tVec, r_ab, res, Sigma]         = optimalSolPr(D,u, sets); 
+
+% Plot the results 
+plotResultPr(r_ab,tVec, res, Sigma, dir, sets)
+
