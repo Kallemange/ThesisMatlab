@@ -34,3 +34,6 @@ sets.plots.distOverT=1;         %Distance over time
 sets.plots.residual=0;          %Residual over reconstruction errors
 sets.plots.var= @(x) (var(x));  
 
+%True position (for frames and projection)
+sets.posECEF=[3098534.400000,1011155.550000,5464107.630000];
+sets.poslla=[59.352907,18.073239,31.999000];

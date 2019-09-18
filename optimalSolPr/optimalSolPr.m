@@ -1,14 +1,12 @@
-function [tVec, r_ab, residual, Sigma]=optimalSolPr(D,u, sets)
+function [tVec, r_ab]=optimalSolPr(D, eph, sets)
 %Calculate the optimal solution in a leat square sense. Working on a
 %weighted matrix solution including a covariance matrix
 %IN:
 %D          STRUCT ARRAY, with difference calculations between rec_a and rec_b
-%u          STRUCT ARRAY, corresponding satellite directions as given by sat
 %OUT:
 %tVec,      ARRAY, time [s] since startup
 %r_ab,      ARRAY[2D], momentary position estimates from optimal solution of pr
 %residual,  ARRAY[2D], reconstruction error per satellite measurement
-%Sigma,     ARRAY[2D], covariance matrix between all measurements 
 
 
 Sigma=0;

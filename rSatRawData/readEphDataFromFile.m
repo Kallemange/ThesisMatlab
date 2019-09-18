@@ -57,12 +57,15 @@ t(t=="ttr2")=[];
 function tVec=posix2GPSTime(t)
 %Update time format from posix (since 1970 -> time in week and s)
 tVec=zeros(1,length(t));
+t_decimal=tVec-floor(tVec);
 for i=1:length(t)
     t0Posix=datetime(t(i),'ConvertFrom','posixtime');
     start_time=[t0Posix.Year, t0Posix.Month, t0Posix.Day, t0Posix.Hour, t0Posix.Minute, floor(t0Posix.Second)];
     [~, ToW]=UTC2GPStime(start_time);
     tVec(i)=ToW;
 end
+tVec=tVec+t_decimal;
+
 
 function l=removeGtimeVal(l)
 %Add the values of toe1+toe2, toc1+toc2, ttr1+ttr2, remove all 2:s

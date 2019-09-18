@@ -1,11 +1,24 @@
-function dPr=calcDiffPr(r1,r2,t1, t0)
+function dPr=calcDiffPr(r1,r2,t1,t2, eph, t0, t_max)
 %Calculation of the difference in pseudorange per each measurement
 %IN raw data[2], valid times indices[2], satellite info
 %OUT struct-array with pseudorange difference, satID, ToW
+c=physconst('lightspeed');
+t1idx   =t1(1):t1(end);
 for i=t1(1):t1(2)
+    t_decimal=r1(i).ToW-floor(r1(i).ToW);
+    [~, t] = UTC_in_sec2GPStime(r1(i).ToW);
+    t=t+t_decimal;
+    keyboard
+    %calculate satellite positions from ephemeris data
+    dsv=zeros(1,length(eph));
+    for j=1:length(eph)
+        dsv(j)=estimate_satellite_clock_bias(t, eph(j));
+    end
+    
+    
     try
         %With r1 as reference, find the closest r2 readings
-        raw1                   = r1(i);
+        raw1                   = r1(t1idx(i));
         r2IdLow                = find([r2.ToW]<=raw1.ToW, 1, 'last');
         r2IdHigh               = find([r2.ToW]>=raw1.ToW, 1, 'first');
         [~, r2idxL, r2idxH]    = intersect(r2(r2IdLow).data.sat, r2(r2IdHigh).data.sat);

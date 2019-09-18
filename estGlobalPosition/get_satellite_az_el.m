@@ -1,4 +1,4 @@
-function [az el] = get_satellite_az_el(xs,ys,zs,xu,yu,zu)
+function [az, el] = get_satellite_az_el(xs,ys,zs,xu,yu,zu)
     % get_satellite_az_el: computes the satellite azimuth and elevation given
     % the position of the user and the satellite in ECEF
     % Usage: [az el] = get_satellite_az_el(xs,ys,zs,xu,yu,zu)

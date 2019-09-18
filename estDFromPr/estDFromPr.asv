@@ -3,7 +3,7 @@ function D=estDFromPr(r1,r2, sets)
 %Find times that both sensors are active for raw data
 %IN data1, data2, name of sorting variable
 %OUT vector subset of valid indices wrt time
-[t1raw, ~, t0r]     = findFirstLast(r1, r2);
+[t1raw, t2raw, t0r, t_endR]     = findFirstLast(r1, r2);
 t1idx   =t1raw(1):t1raw(end);
 for i=t1idx(1):t1idx(2)
     t_decimal=r1(i).ToW-floor(r1(i).ToW);
