@@ -36,6 +36,10 @@ receiver, meaning that the position is at all times given by receiver
 --------------------------------------------------------------------------
 Part 3: Test magnitude between theoretical distance receiver<-->satellite
 and measured. 
+--------------------------------------------------------------------------
+Part 4: Test Delta P over time for double differentiated satellite
+measurements
+
 
 %}
 %% Load Data
@@ -124,8 +128,13 @@ load allLogData.mat %Contains the raw log data organized in structs
 load allEstPos.mat %Contains the positional estimate calculations already made
 %% Step 2 compute the position based on the observation and ephmeris data
 % 
-% x=estGlobalPos([raw data], [ephemeris data], [step size](default=5), [t_end] (default=all))
-% e.g.:
-x1E_0706  = estGlobalPos(raw1E_0706, ephE_0706, 1);
+%true position given by pRec as internal solution of E1_0706
+pRec=[gpsData0706.ecef_0_(1) gpsData0706.ecef_1_(1) gpsData0706.ecef_2_(1)];
+compare_obs_sat_pos(raw1E_0706,ephE_0706,pRec, 1);
+compare_obs_sat_pos(raw1E_0706,ephE_0706,pRec, 2);
+compare_obs_sat_pos(raw1E_0706,ephE_0706,pRec, 3);
+compare_obs_sat_pos(raw1E_0706,ephE_0706,pRec, 4);
+compare_obs_sat_pos(raw1E_0706,ephE_0706,pRec, 5);
+%x1E_0706  = estGlobalPos(raw1E_0706(2), ephE_0706, 1);
 % x1N       = estGlobalPos(raw1N, ephN, 1, 100);
 %x1Ros=estGlobalPos(rawRos, ephRos)

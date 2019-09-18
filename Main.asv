@@ -83,9 +83,8 @@ dir =' D';
 %}
 %% Load all data from logfiles
 dir =' N'; addpath rSatRawData\;
-path="Logs/";
-date="Uggleviken0411/";
-[sat1 sat2 raw1 raw2] = rSatRawData(path+date,"N");
+path="Logs";
+[sat1 sat2 raw1 raw2] = rSatRawData(path+'Uggleviken0411/','N');
 %%
 dir =' E'; addpath rSatRawData\;
 [sat1 sat2 raw1 raw2] = rSatRawData('Uggleviken0411/','E');
@@ -94,11 +93,6 @@ dir =' E'; addpath rSatRawData\;
 %load('10mN')
 %load('10mE')
 dir =' E'; addpath rSatRawData\;
-%%
-dir =' N'; addpath rSatRawData\;
-path="Logs/";
-date="Uggleviken0706/";
-[sat1 sat2 raw1 raw2] = rSatRawData(path+date,"N");
 %% My own simulated data
 addpath simulateRawData\;
 dir='N'
@@ -117,17 +111,13 @@ t0=1.555058801792000e+09;
 %IN satellite data[2], raw data[2]
 %OUT pseudo range distance between reciever ab, unit vector to satellites
 addpath estDFromPr\;
-'Estimating D'
 [D u]                 = estDFromPr(sat1,sat2, raw1, raw2, sets);
-
 % Estimate the relative position from the pr-measurements
 %Optimal solution calculated as inv(H'H)H'D for (x,y,z)
 %IN pseudorange distance, directions to satellites
 %OUT time since start, distance in xyz, clock-drift over time
 
 addpath optimalSolPr\;
-'optimalSol'
 [tVec, r_ab, res, Sigma]         = optimalSolPr(D,u, sets); 
-
 % Plot the results 
 plotResultPr(r_ab,tVec, res, Sigma, dir, sets)
