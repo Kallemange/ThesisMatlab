@@ -9,8 +9,6 @@ function [xVec tVec, H]=estGlobalPos(raw, eph, t_end, h, plotOut)
     %a new read is made an updated value may be introduced
 %2) Perform global positioning of satellites
     %(Keep track of the time transformation from UTC-GPST)
-
-=======
 function out=estGlobalPos(raw, eph, h, t_end)
 %Estimate global position from the raw data available in obsd_t and eph_t 
 %calculations based on those presented in telesens
@@ -39,7 +37,6 @@ function out=estGlobalPos(raw, eph, h, t_end)
 %               obs: raw pseudorange values
 %               obsAdj: pseudorange adjusted wrt receiver clock bias estimate
 %               t: time of week (GPS time) [s] 
->>>>>>> debugging_global_pos
 
 %Args: T: epochs in raw       
 % Constants that we will need
@@ -57,7 +54,6 @@ b = 0;
 %All the svID's available in the eph-data for referencing
 eph=eph([eph(:).sat]<=32);
 satID=[eph(:).sat]';
-<<<<<<< HEAD
 %satID=satID(satID<=32);
 xVec=[];
 if nargin<5
@@ -71,8 +67,6 @@ if nargin<3
 end
 tVec=[raw(1:h:t_end).ToW];
 for i=1:h:t_end
-    i
-=======
 satID=satID(satID<=32);
 out.bVec=[];
 out.xVec=[];
@@ -101,7 +95,6 @@ for i=1:h:t_end
     if mod(i,100)==1
         ['iteration:'    num2str(i)]
     end
->>>>>>> debugging_global_pos
     %Time is converted from posix (seconds since 1970) to ToW used in GPS
     %to get alignment. 
     [~, t]=UTC_in_sec2GPStime(raw(i).ToW);
@@ -158,7 +151,6 @@ for i=1:h:t_end
         b = b_;
         
     end
-<<<<<<< HEAD
     %[lat lon alt]=ECEF2LLA(satPosECEF);
     %[[eph(:).sat]' lat*180/pi lon*180/pi]
     %lla=ecef2lla(xu, 'WGS84');
@@ -179,7 +171,6 @@ if(plotOut)
         plot(tVec-tVec(1),xVec(:,i)-xVec(1,i), '*')
         xlabel(strcat(labelVec(i),'-axis in ECEF'))
     end
-=======
     %Calculate the DOP-matrix values
     out.Hvec{end+1}=calcH(posRec, Xs);
     out.bVec=[out.bVec b];
@@ -207,6 +198,5 @@ if(plotOut)
     obsVec.t(end+1)=t;
     out.satPos=allSatPos;
     out.obsVec=obsVec;
->>>>>>> debugging_global_pos
 end
 end

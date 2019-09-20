@@ -2,6 +2,8 @@ function dPr=calcDiffPr(r1,r2,t1)
 %Calculation of the difference in pseudorange per each measurement
 %IN raw data[2], valid times indices[2], satellite info
 %OUT struct-array with pseudorange difference, satID, ToW
+
+%dPr=cell(100,1);
 for i=t1(1):t1(2)
     try
         %With r1 as reference, find the closest r2 readings
@@ -27,11 +29,9 @@ for i=t1(1):t1(2)
         dPr(i).dp              = raw1.data.P(i1)-raw2.data.P(i2);
         dPr(i).sat             = raw1.data.sat(i1);
         dPr(i).ToW             = raw1.ToW; 
-        %dPr(i).SNR             = [raw1.data.SNR(i1) raw2.data.SNR(i2)];
-
     catch EM
         keyboard
     end
-        
+    
 end
 

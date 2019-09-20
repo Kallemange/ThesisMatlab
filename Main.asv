@@ -136,9 +136,8 @@ SimSettings;
 % t1raw, double[2]: first and last usable index for differenced obs
 %OUT 
 %D, struct[]:   Observation difference data, containing fields:
-%   dp:    (single) differenced pr value
-%   sat:   corresponding satellite ID
-%   ToW:   time of week (GPST [s])
+%   dp:   (single) differenced pr value
+%   sat:  corresponding satellite value
 addpath estDFromPr\;
 [t1raw, ~, t0r]     = findFirstLast(raw1, raw2);
 t1idx   =t1raw(1):t1raw(end);
