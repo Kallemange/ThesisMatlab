@@ -150,13 +150,13 @@ end
 %Compute relative position from observation data and own 
 %calculation of satellite position
 %% Read data from logfiles
-dir =' N'; 
+dir =" E"; 
 addpath rSatRawData\;
 addpath('estGlobalPosition/')
 path="Logs/";
 date="Uggleviken0706/";
 SimSettings;
-[eph1, eph2, raw1, raw2] = rSatRawData(path+date,"N");
+[eph1, eph2, raw1, raw2] = rSatRawData(path+date,"E");
 %%
 
 % Calculate distance from pseudorange measurements
@@ -166,16 +166,12 @@ addpath estDFromPr\;
 [t1raw, ~, t0r]     = findFirstLast(raw1, raw2);
 t1idx   =t1raw(1):t1raw(end);
 D=calcDiffPr(raw1,raw2,t1raw);
-%%
 
 % Estimate the relative position from the pr-measurements
-%Optimal solution calculated as inv(H'H)H'D for (x,y,z)
+%Optimal solution calculated as r=(H'H)\H'D for (x,y,z)
 %IN pseudorange distance, directions to satellites
 %OUT time since start, distance in xyz, clock-drift over time
-
 addpath optimalSolPr\;
-[tVec, r_ab]         = optimalSolPr(D,eph1, sets); 
-
-% Plot the results 
-plotResultPr(r_ab,tVec, res, Sigma, dir, sets)
+[tVec, r_ab, DD]         = optimalSolPr(D,eph1, sets); 
+plotResultPr(r_ab,tVec, DD, dir, sets)
 
