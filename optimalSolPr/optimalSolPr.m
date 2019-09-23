@@ -1,4 +1,4 @@
-function [tVec, r_ab, DDVec]=optimalSolPr(D, eph, sets)
+function [tVec, r_ab, DDVec, refSat]=optimalSolPr(D, eph, sets)
 %Calculate the optimal solution in a leat square sense. Working on a
 %weighted matrix solution including a covariance matrix
 %IN:

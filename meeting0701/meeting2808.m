@@ -158,7 +158,6 @@ date="Uggleviken0706/";
 SimSettings;
 [eph1, eph2, raw1, raw2] = rSatRawData(path+date,"E");
 %%
-
 % Calculate distance from pseudorange measurements
 %IN satellite data[2], raw data[2]
 %OUT pseudo range distance between reciever ab, unit vector to satellites
@@ -172,6 +171,6 @@ D=calcDiffPr(raw1,raw2,t1raw);
 %IN pseudorange distance, directions to satellites
 %OUT time since start, distance in xyz, clock-drift over time
 addpath optimalSolPr\;
-[tVec, r_ab, DD]         = optimalSolPr(D,eph1, sets); 
-plotResultPr(r_ab,tVec, DD, dir, sets)
+[tVec, r_ab, DD, refSat]         = optimalSolPr(D,eph1, sets); 
+plotResultPr(r_ab,tVec, DD, dir, refSat, sets)
 

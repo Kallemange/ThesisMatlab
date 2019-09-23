@@ -12,6 +12,7 @@ i=1;
 while ischar(tline)
     tline=fgetl(fid);
     try
+    week=find(titles=="week");
     line=str2num(tline);
     line([9 11 13])=posix2GPSTime(line([9 11 13]));
     line=removeGtimeVal(line);
@@ -65,6 +66,7 @@ for i=1:length(t)
     tVec(i)=ToW;
 end
 tVec=tVec+t_decimal;
+
 
 
 function l=removeGtimeVal(l)

@@ -1,4 +1,4 @@
-function plotResultPr(r_ab, tVec, DD, trueDir, sets)
+function plotResultPr(r_ab, tVec, DD, trueDir, refSat, sets)
 %{ 
 %Plot the results from previous calculations.
 The plots consist of:
@@ -9,8 +9,8 @@ The plots consist of:
         suplot 1
             Double difference value per satellite
         subplot 2
-            TODO
             Expected double difference wrt satellite position
+            -Seems erroneous, investigate
     Plot3:
         Histogram over all distances in NED
     Plot4:
@@ -78,23 +78,6 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Plot 2
 if sets.plots.DDVec
-    figure
-    sgtitle("Double Difference as function of time per satellite without changing reference sat")
-    legendDD=[];
-    
-    subplot(211)
-    title("Measured double difference")
-    hold on
-    for i=1:length(DD)
-        plot(DD{i}.ToW-tVec(1),DD{i}.DD, '*', 'MarkerSize', 1)
-        legendDD=[legendDD; string(num2str(DD{i}.satID))];
-    end
-    leg=legend(legendDD);
-    title(leg,"SatID");
-    xlabel("Time since startup [s]")
-    ylabel("Double difference [m]")
-    subplot(212)
-    hold on
     if strcmp(trueDir, " E")
         distN=0;
         distE=10;
@@ -102,17 +85,25 @@ if sets.plots.DDVec
         distN=10;
         distE=0;
     end
-    
     [x, y, z]=ned2ecef(distN,distE,0, sets.poslla(1), sets.poslla(2), sets.poslla(3),spheroid);
     r_true=([x y z]-sets.posECEF)';
-    for i=1:length(DD)
-        plot(DD{i}.ToW-tVec(1), DD{i}.dU*r_true)
+    figure
+    sgtitle("Double Difference as function of time per satellite with reference sat "+num2str(refSat))
+    %Give an appropriate amount of subplots for the amount of measurements
+    if (length(DD)<(floor(sqrt(length(DD))))*ceil(sqrt((length(DD)))))
+        rows=floor(sqrt(length(DD)));
+        cols=ceil(sqrt((length(DD))));
+    else
+        rows=ceil(sqrt((length(DD))));
+        cols=rows;
     end
-    title("Expected distance calculated as (e^i-e^0)\cdot r_{ab} over time")
-    xlabel('Time since startup [s]')
-    ylabel("Distance [m]")
-
-    
+    for i=1:length(DD)
+        subplot(rows, cols, i)
+        hold on
+        plot(DD{i}.ToW-tVec(1),DD{i}.DD, '*', 'MarkerSize', 1)
+        plot(DD{i}.ToW-tVec(1), DD{i}.dU*r_true)
+        ylabel("satID: "+num2str(DD{i}.satID))
+    end   
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
