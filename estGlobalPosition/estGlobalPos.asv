@@ -45,7 +45,7 @@ c = 299792458;
 % Earth's rotation rate
 omega_e = 7.2921151467e-5; %(rad/sec)
 % initial position of the user
-xu = posRec;
+xu = [0 0 0];
 % initial clock bias
 b = 0;
 %All the svID's available in the eph-data for referencing
@@ -64,7 +64,7 @@ out.llaVec=[];
 out.tauVec=[];
 
 week=eph(1).week;
-tVec=[];
+[~, tVec]=UTC_in_sec2GPStime([raw(1:h:t_end).ToW], week);
 noSats=length(eph);
 allSatPos.pos=cell(noSats,1);
 allSatPos.pos_unadj=cell(noSats,1);
@@ -120,15 +120,15 @@ for i=1:h:t_end
             %xs_vec = [xs_ ys_ zs_]';
             Xs = [Xs; xs_vec'];
         end
-        [~, el, dist]=ecef2elaz(Xs,posRec);
+        [~, el]=ecef2elaz(Xs,posRec);
         Xs(el<elMask,:)=[];
         pr(el<elMask)=[];
         eph_t(el<elMask)=[];
-        if length(pr)<4
+        if length(pr<4)
             continue
+            
         end
         [x_, b_, norm_dp, G] = estimate_position(Xs, pr, length(pr), xu, b, 3);
-        tVec(end+1)=t;
         % Change in the position and bias to determine when to quit
         % the iteration
         dx = x_ - xu;

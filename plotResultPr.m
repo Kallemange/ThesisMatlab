@@ -78,10 +78,10 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Plot 2
 if sets.plots.DDVec
-    if strcmp(trueDir, " E")
+    if strcmp(strip(trueDir), "E")
         distN=0;
         distE=10;
-    elseif strcmp(trueDir, " N")
+    elseif strcmp(strip(trueDir), "N")
         distN=10;
         distE=0;
     end

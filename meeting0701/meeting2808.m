@@ -1,19 +1,6 @@
 %{
 Part1:
 TEST_ESTIMATE_POSITION:
-Meeting 28/8
-Verifiera beteendet hos estimate_position.m mha simuleringar, i 3 steg
-1) Helt utan fel
-2) Fel i mottagarposition
-3) Klockfel (ms)
-4) Fel i beräknad satellitposition (slumpfel parameter/algoritmfel)
-5) Fel i beräknad satellitposition (klockfel UNIX->ToW conversion)
-
-Kolla konvergens baserat på olika fel i indata och plotta KLAR
-
-Skall kolla hur konvergensen ser ut vid olika indata KLAR
-
-
 For a given type of input noise, an error will be produced in the output
 data. The behaviour is plotted in two kinds of graphs, investigating the
 error in position estimate and clock bias estimate.
@@ -39,9 +26,11 @@ and measured.
 --------------------------------------------------------------------------
 Part 4: Test Delta P over time for double differentiated satellite
 measurements
-
 Values of the distance between receivers should be in the range ±10 m
 If values wa
+--------------------------------------------------------------------------
+Part 5: Test global position estimate
+
 
 
 
@@ -149,7 +138,7 @@ end
 %% Part 4 
 %Compute relative position from observation data and own 
 %calculation of satellite position
-%% Read data from logfiles
+% Read data from logfiles
 dir =" E"; 
 addpath rSatRawData\;
 addpath('estGlobalPosition/')
@@ -157,7 +146,7 @@ path="Logs/";
 date="Uggleviken0706/";
 SimSettings;
 [eph1, eph2, raw1, raw2] = rSatRawData(path+date,"E");
-%%
+
 % Calculate distance from pseudorange measurements
 %IN satellite data[2], raw data[2]
 %OUT pseudo range distance between reciever ab, unit vector to satellites
@@ -173,4 +162,21 @@ D=calcDiffPr(raw1,raw2,t1raw);
 addpath optimalSolPr\;
 [tVec, r_ab, DD, refSat]         = optimalSolPr(D,eph1, sets); 
 plotResultPr(r_ab,tVec, DD, dir, refSat, sets)
-
+%% Part 5 Estimate global position
+addpath('SatsMove/')
+addpath('../data');
+%load allLogData.mat %Contains the raw log data organized in structs
+%load allEstPos.mat %Contains the positional estimate calculations already made
+path="Logs/Uggleviken";
+date="0706/";
+dir="E";
+[eph1, eph2, raw1, raw2] = rSatRawData(path+date+dir);
+gps1=readtable(path+date+dir+"1/gps.csv");
+gps2=readtable(path+date+dir+"2/gps.csv");
+%compute the position based on the observation and ephmeris data 
+% x=estGlobalPos([raw data], [ephemeris data], [step size](default=5), [t_end] (default=all))
+%%
+x1=estGlobalPos(raw1,eph1);
+x2=estGlobalPos(raw2,eph2);
+%%
+plot_global_estimate(x1, x2,gps1, gps2)

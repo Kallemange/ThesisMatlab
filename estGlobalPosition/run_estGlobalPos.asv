@@ -10,8 +10,7 @@ path="Logs/Uggleviken";
 date="0706/";
 dir="N";
 [eph1, eph2, raw1, raw2] = rSatRawData(path+date+dir);
-gps1=readtable(path+date+dir+"1/gps.csv");
-gps2=readtable(path+date+dir+"2/gps.csv");
+gpsData1=readtable(path+date+dir+"/gps.csv")
 %% Step 2 compute the position based on the observation and ephmeris data
 % 
 % x=estGlobalPos([raw data], [ephemeris data], [step size](default=5), [t_end] (default=all))
@@ -29,10 +28,8 @@ for i=1:3
     
     subplot(3,1,i)
     hold on
-    plot(x1.tVec,x1.xVec(:,i))
-    plot(gps1.ToWms/1000, gps1.("ecef_"+num2str(i-1)+"_"))
-    plot(x2.tVec, x2.xVec(:,i));
-    plot(gps2.ToWms/1000,    gps2.("ecef_"+num2str(i-1)+"_"))
+    plot(x1.xVec(:,i)-posECEF(i))
+    plot(x2.xVec(:,i)-posECEF(i));
 end
 figure
 for i=1:3    
