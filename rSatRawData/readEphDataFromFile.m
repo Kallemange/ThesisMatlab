@@ -60,23 +60,5 @@ function tow=posix2GPSTime(t, week)
 %Update time format from posix (since 1970 -> time in week and s)
 GPS_UNIX_OFFSET= 315964800;
 tow= (t- GPS_UNIX_OFFSET- week*604800);
-% tVec=zeros(1,length(t));
-% t_decimal=tVec-floor(tVec);
-% for i=1:length(t)
-%     t0Posix=datetime(t(i),'ConvertFrom','posixtime');
-%     start_time=[t0Posix.Year, t0Posix.Month, t0Posix.Day, t0Posix.Hour, t0Posix.Minute, floor(t0Posix.Second)];
-%     [~, ToW]=UTC2GPStime(start_time);
-%     tVec(i)=ToW;
-% end
-% tVec=tVec+t_decimal;
-
-
-
-% function l=removeGtimeVal(l)
-% %Add the values of toe1+toe2, toc1+toc2, ttr1+ttr2, remove all 2:s
-% l(9)=l(9)+l(10);
-% l(11)=l(11)+l(12);
-% l(13)=l(13)+l(14);
-% l([10 12 14])=[];
 
 

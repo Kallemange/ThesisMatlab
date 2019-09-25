@@ -40,6 +40,7 @@ addpath('../estGlobalPosition/')
 addpath('../estGlobalPosition/SatsMove/')
 addpath('../data');
 addpath('../Simulations/GlobalPosEstimate')
+%%
 load allLogData.mat
 load allEstPos.mat
 %% Create the starting position and satellite positions 
@@ -170,6 +171,7 @@ addpath('../data');
 path="Logs/Uggleviken";
 date="0706/";
 dir="E";
+%%
 [eph1, eph2, raw1, raw2] = rSatRawData(path+date+dir);
 gps1=readtable(path+date+dir+"1/gps.csv");
 gps2=readtable(path+date+dir+"2/gps.csv");

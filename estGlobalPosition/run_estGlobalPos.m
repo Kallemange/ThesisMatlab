@@ -10,6 +10,7 @@ path="Logs/Uggleviken";
 date="0706/";
 dir="N";
 [eph1, eph2, raw1, raw2] = rSatRawData(path+date+dir);
+
 gps1=readtable(path+date+dir+"1/gps.csv");
 gps2=readtable(path+date+dir+"2/gps.csv");
 %% Step 2 compute the position based on the observation and ephmeris data

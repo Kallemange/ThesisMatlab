@@ -15,9 +15,8 @@ while ischar(tline)
     if(i>1&&line(2)+line(3)==T(i-1).ToW)
         T(i-1).numSats=T(i-1).numSats+line(1);
         for j=1:line(1)
-            T(i-1).data(end+1,:)=array2table((line(4+(j-1)*L:3+L+(j-1)*L)), 'variableNames', titles(4:end));
+            T(i-1).data(end+1,:)=line(4+(j-1)*L:3+L+(j-1)*L);
         end
-        %keyboard;
         continue;
     end
     catch ME
@@ -31,7 +30,7 @@ while ischar(tline)
     for j=1:T(i).numSats
         data(j,:)=(line(4+(j-1)*L:3+L+(j-1)*L));
     end
-    T(i).data=array2table(data, 'variableNames', titles(4:end));
+    T(i).data=data;
     i=i+1;
 end
 fclose(fid)

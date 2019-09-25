@@ -53,6 +53,9 @@ eph=eph([eph(:).sat]<=32);
 satID=[eph(:).sat]';
 %satID=satID(satID<=32);
 xVec=[];
+%Indexing function to get the column in the dataset
+I =@(var) find(["sat", "SNR", "LLI", "code", "P"]==var);
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %for i=1:h:t_end
@@ -74,7 +77,6 @@ obsVec.obs=cell(noSats,1);
 obsVec.obsAdj=cell(noSats,1);
 obsVec.t=[];
 
-dsv = zeros(size(eph));
 for i=1:h:t_end
     if mod(i,1000)==1
         ['iteration:'    num2str(i)]
@@ -85,25 +87,25 @@ for i=1:h:t_end
     %Extract those measurements in raw which has corresponding eph-data
     %Also use only that eph-data for satellites which has an obs
     raw_t=sortrows(raw(i).data, 1);
-    [~, iR, iE]=intersect(raw_t.sat,satID);
-    obs=raw_t.P(iR);
+    [~, iR, iE]=intersect(raw_t(:,I("sat")),satID);
+    obs=raw_t(iR,I("P"));
     eph_t=eph(iE);
+    [eph_t, obs]=satElevMask(eph_t,obs, t, posRec, elMask);
     if length(obs)<4
         continue
     end
     %Calculate the satellite clock bias
+    dsv = zeros(size(eph_t));
     for j=1:length(eph_t)
-        dsv(j) = estimate_satellite_clock_bias(t, eph(j));   
-    end    
-    
+        dsv(j) = estimate_satellite_clock_bias(t, eph_t(j));   
+    end 
     %And transform it to a distance through c
     %Adjust the raw pr-measurement for the clock bias of the sv
-    obsAdj=obs+dsv(iE)'*c;
+    obsAdj=obs+dsv'*c;
     
     dx = 100*ones(1,3); db = 100;
     while(norm(dx) > 0.1 && norm(db) > 1)
         Xs = []; % concatenated satellite positions
-        Xs_unadj=[];
         pr = []; % pseudoranges corrected for user clock bias
         for k=1:length(eph_t)
             % correct for our estimate of user clock bias. Note that
@@ -120,15 +122,7 @@ for i=1:h:t_end
             %xs_vec = [xs_ ys_ zs_]';
             Xs = [Xs; xs_vec'];
         end
-        [~, el, dist]=ecef2elaz(Xs,posRec);
-        Xs(el<elMask,:)=[];
-        pr(el<elMask)=[];
-        eph_t(el<elMask)=[];
-        if length(pr)<4
-            continue
-        end
         [x_, b_, norm_dp, G] = estimate_position(Xs, pr, length(pr), xu, b, 3);
-        tVec(end+1)=t;
         % Change in the position and bias to determine when to quit
         % the iteration
         dx = x_ - xu;
@@ -137,7 +131,11 @@ for i=1:h:t_end
         b = b_;
         
     end
+    %dist-pr
+    %keyboard
+    
     xVec=[xVec; x_];
+    tVec(end+1)=t;
     %Calculate the DOP-matrix values
     out.Hvec{end+1}=calcH(posRec, Xs);
     out.bVec=[out.bVec b];
@@ -164,4 +162,18 @@ for i=1:h:t_end
     out.satPos=allSatPos;
     out.obsVec=obsVec;
 end
+end
+function [eph, obs] = satElevMask(eph, obs, t, p, elMask)
+%Rough elevation mask to remove readings at a low elevation.
+%This does not take the clock bias and transmission time into account due
+%to the fact of satellite position changing slowly
+Xs=[];
+for k=1:length(eph)
+    [xs_, ys_, zs_]=get_satellite_position(eph(k),t,1);
+    xs_vec = [xs_ ys_ zs_]';
+    Xs = [Xs; xs_vec'];
+end
+[~, el]=ecef2elaz(Xs,p);
+eph(el<elMask)=[];
+obs(el<elMask)=[];
 end
