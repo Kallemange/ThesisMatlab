@@ -95,6 +95,7 @@
 	x_prime = r*cos(u);
 	y_prime = r*sin(u);
 	omega = eph.OMG0 + (eph.OMGd - omega_dot_earth)*tk - omega_dot_earth*eph.toe;
+    
 
 	x = x_prime*cos(omega) - y_prime*cos(i)*sin(omega);
 	y = x_prime*sin(omega) + y_prime*cos(i)*cos(omega);

@@ -181,4 +181,4 @@ gps2=readtable(path+date+dir+"2/gps.csv");
 x1=estGlobalPos(raw1,eph1);
 x2=estGlobalPos(raw2,eph2);
 %%
-plot_global_estimate(x1, x2,gps1, gps2)
+plot_global_estimate(x1, x2, gps1, gps2)

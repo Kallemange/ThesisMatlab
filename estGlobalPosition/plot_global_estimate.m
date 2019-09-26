@@ -9,6 +9,7 @@ pS=[xS, yS, zS];
 x1ECEF=[xS,yS,zS];
 [xS, yS, zS]=ecef2ned(x2.xVec(:,1),x2.xVec(:,2),x2.xVec(:,3),pL(1),pL(2),pL(3),spheroid);
 x2ECEF=[xS, yS, zS];
+dirVec=["N", "E", "D"];
 for i=1:3
     subplot(3,1,i)
     hold on
@@ -18,8 +19,9 @@ for i=1:3
     plot(g2.ToWms/1000-x1.tVec(1), g2.("ecef_"+num2str(i-1)+"_")-pE(i))
     legend("rec1", "gps1", "rec2", "gps2")
     xlabel("Time since startup")
+    ylabel(dirVec(i))
 end
-sgtitle("Position difference in ECEF-coordinates")
+sgtitle("Position difference in NED-coordinates")
 
 figure
 for i=1:3    
