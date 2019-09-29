@@ -1,4 +1,4 @@
-function [t1idx t2idx, t0, t_end]=findFirstLast(r1, r2)
+function [t1idx, t2idx, t0, t_end]=findFirstLast(r1, r2)
 %IN: Two struct-arrays
 %OUT: First and last valid index for array 1 and 2, first and last valid sample
 

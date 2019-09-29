@@ -16,7 +16,5 @@ lla=ecef2lla(x0);
 [N, E, D]=ecef2ned(x(:,1),x(:,2),x(:,3), lla(1), lla(2), lla(3), spheroid);
 [az, el, r]=cart2sph(N, E, D);
 az=180/pi*az;
-if az<0
-    az=360+az;
-end
+az(az<0)=az(az<0)+360;
 el=-180/pi*el;

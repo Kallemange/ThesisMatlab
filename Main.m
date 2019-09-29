@@ -87,8 +87,11 @@ path="Logs/";
 date="Uggleviken0411/";
 [sat1 sat2 raw1 raw2] = rSatRawData(path+date,"N");
 %%
-dir =' E'; addpath rSatRawData\;
-[sat1 sat2 raw1 raw2] = rSatRawData('Uggleviken0411/','E');
+addpath rSatRawData\;
+dir ="E"; 
+date="Uggleviken0411/";
+path="Logs/"+date+dir;
+[eph1, eph2,raw1 raw2] = rSatRawData(path)
 %% Or load them from a .mat file
 %Stationary receivers at 10m separation in N or E direction
 %load('10mN')
@@ -121,13 +124,13 @@ t0=1.555058801792000e+09;
 % eph, struct[]:  ephemeris data from receivers 1 and 2
 % raw, struct[]:  observation data from receivers 1 and 2
 
-dir =" E"; 
+dir ="E"; 
 addpath rSatRawData\;
 addpath('estGlobalPosition/')
 path="Logs/";
 date="Uggleviken0706/";
 SimSettings;
-[eph1, eph2, raw1, raw2] = rSatRawData(path+date,"E");
+[eph1, eph2, raw1, raw2] = rSatRawData(path+date+dir);
 %%
 
 % Calculate difference between pseudorange measurements
@@ -140,7 +143,7 @@ SimSettings;
 %   sat:   corresponding satellite ID
 %   ToW:   time of week (GPST [s])
 addpath estDFromPr\;
-[t1raw, ~, t0r]     = findFirstLast(raw1, raw2);
+[t1raw, ~, t0r]         = findFirstLast(raw1,raw2);
 t1idx   =t1raw(1):t1raw(end);
 D=calcDiffPr(raw1,raw2,t1raw);
 
@@ -149,5 +152,5 @@ D=calcDiffPr(raw1,raw2,t1raw);
 %IN pseudorange distance, directions to satellites
 %OUT time since start, distance in xyz, clock-drift over time
 addpath optimalSolPr\;
-[tVec, r_ab, DD]         = optimalSolPr(D,eph1, sets); 
-plotResultPr(r_ab,tVec, DD, dir, sets)
+[tVec, r_ab, DD, refSat]         = optimalSolPr(D,eph1, sets); 
+plotResultPr(r_ab,tVec, DD, dir, refSat, sets)
