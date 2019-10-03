@@ -33,9 +33,7 @@ L=length(r2);
 for i=t1(1):t1(2)
     %With r1 as reference, find the closest r2 readings
     raw1                   = r1(i);
-    %r2IdLow                = find([r2.ToW]<=raw1.ToW, 1, 'last');
-    %r2IdHigh               = find([r2.ToW]>=raw1.ToW, 1, 'first');
-    %Faster version, constantly index up j
+    %Increment up j so that j<raw1.ToW, j+1>raw1.ToW
     while k<L-1
         if r2(k+1).ToW>raw1.ToW
             break
@@ -63,6 +61,8 @@ for i=t1(1):t1(2)
     [~, i1, i2]            = intersect(raw1.data(:,I("sat")), raw2.data(:,I("sat")));
     dPr(i).dp              = raw1.data(i1,I("P"))-raw2.data(i2,I("P"));
     dPr(i).sat             = raw1.data(i1,I("sat"));
+    dPr(i).SNR             = raw1.data(i1,I("SNR"));
     dPr(i).ToW             = raw1.ToW; 
+    
 end
 

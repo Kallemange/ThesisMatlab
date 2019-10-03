@@ -79,7 +79,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Plot 2
 if sets.plots.DDVec
-    [distN, distE]=dist(trueDir, 10);
+    [distN, distE]=deal(dist(trueDir, 10));
     [x, y, z]=ned2ecef(distN,distE,0, sets.poslla(1), sets.poslla(2), sets.poslla(3),spheroid);
     r_true=([x y z]-sets.posECEF)';
     figure
@@ -192,11 +192,7 @@ if sets.plots.hist
         xlabel(strcat('NED: ',32,  meanstr(1:end-2), '[m]',32, varstr(1:end-2)))
     end
 end
-end
 
-function [N, E]=dist(trueDir, val)
-%Get the values in N and E direction from input direction
-dist=[strcmp(strip(trueDir), ["E", "N"])*val];
-N=dist(1);
-E=dist(2);
-end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [distN, distE]=dist(
+dist=@(trueDir, val) [strcmp(strip(trueDir), ["E", "N"])*val];

@@ -43,13 +43,13 @@ end
 if nargin<6 % Elevation mask for satellites
     elMask=15;
 end
-if nargin<5 % True position (within 10 m)
+if (nargin<5||posRec==0) % True position (within 10 m)
     posRec=1e6*[3.098535745669152   1.011153667313954   5.464107220927055]; 
 end
 if nargin<4 % Step size, how many iterations to use
     h=1;
 end
-if nargin<3 % Final value used in the log
+if (nargin<3||t_end==0) % Final value used in the log
     t_end=length(raw);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -132,8 +132,6 @@ for i=1:h:t_end
         b = b_;
         
     end
-    
-    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Store positions of satellites and observations at time of observation
     % in cell struct

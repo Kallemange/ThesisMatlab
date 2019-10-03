@@ -22,12 +22,14 @@ sets.noise.round=1;             %Round off the value in the elev-azim measuremen
 %Which satellite to choose, different functions available.
 %options: minHDOP, median
 sets.optSol.sats='median';     
-sets.optSol.Weights=0;          %Use a weighted matrix for LS-solution calculations
+sets.optSol.Weights="SNR";          %Use a weighted matrix for LS-solution calculations
+sets.optSol.elMask=15;
+sets.optSol.OnlyGPS=1;
 
 %Plot:                          %Which plots to show
 sets.plots.isSim=0;             %If run is simulation or not
 sets.plots.hist=1;              %Histogram over estimate distribution
-sets.plots.histPerDir=1;        %Histogram over estimat per direction
+sets.plots.histPerDir=0;        %Histogram over estimate per direction
 sets.plots.cov=0;               %Covariance matrix satellite-readings 
 sets.plots.posOverT=1;          %Position over time estimate
 sets.plots.distOverT=1;         %Distance over time
