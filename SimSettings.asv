@@ -22,7 +22,7 @@ sets.noise.round=1;             %Round off the value in the elev-azim measuremen
 %Which satellite to choose, different functions available.
 %options: minHDOP, median
 sets.optSol.sats='median';     
-sets.optSol.Weights="SNR";          %Options: "SNR", "elev", "elevSNR" Weighted matrix for LS-solution, possible values 
+sets.optSol.Weights="SNR";          %Options"SNR", "elev"
 sets.optSol.elMask=15;
 sets.optSol.OnlyGPS=1;
 

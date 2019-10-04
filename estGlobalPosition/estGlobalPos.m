@@ -1,4 +1,4 @@
-function out=estGlobalPos(raw, eph, h, t_end, posRec, elMask, onlyGPS)
+function out=estGlobalPos(raw, eph, sets)
 % Estimate global position from the raw data available in obsd_t and eph_t 
 % calculations based on those presented in 
 % http://www.telesens.co/2017/07/17/calculating-position-from-raw-gps-data/
@@ -37,21 +37,15 @@ function out=estGlobalPos(raw, eph, h, t_end, posRec, elMask, onlyGPS)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Input argument cases
-if (nargin<7||onlyGPS) % Remove all non GPS-satellites
+if (sets.optSol.OnlyGPS) % Remove all non GPS-satellites
     eph     =eph([eph(:).sat]<=32);
 end
-if nargin<6 % Elevation mask for satellites
-    elMask=15;
-end
-if (nargin<5||posRec==0) % True position (within 10 m)
-    posRec=1e6*[3.098535745669152   1.011153667313954   5.464107220927055]; 
-end
-if nargin<4 % Step size, how many iterations to use
-    h=1;
-end
-if (nargin<3||t_end==0) % Final value used in the log
+if ~sets.globalPos.t_end % Final value used in the log
     t_end=length(raw);
 end
+elMask  = sets.optSol.elMask; % Elevation mask for satellites
+posRec  = sets.posECEF;
+h       = sets.globalPos.h;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Constants
 c       = 299792458;        % Speed of light
@@ -179,3 +173,4 @@ end
 eph(el<elMask)=[];
 obs(el<elMask)=[];
 end
+

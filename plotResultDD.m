@@ -1,4 +1,4 @@
-function plotResultPr(r_ab, tVec, DD, trueDir, refSat, sets)
+function plotResultDD(r_ab, tVec, DD, trueDir, refSat, sets)
 %{ 
 %Plot the results from previous calculations.
 The plots consist of:
@@ -79,14 +79,11 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Plot 2
 if sets.plots.DDVec
-    [distN, distE]=deal(dist(trueDir, 10));
+    [distN, distE]=dist(trueDir, 10);
     [x, y, z]=ned2ecef(distN,distE,0, sets.poslla(1), sets.poslla(2), sets.poslla(3),spheroid);
     r_true=([x y z]-sets.posECEF)';
     figure
-    sgtitle({"Double Difference as function of time per satellite with reference sat "+num2str(refSat.ID),
-            "elevation-azimuth between angles: [" + num2str(round(refSat.elAz([1 end],1))')+ "], ["+...
-            num2str(round(refSat.elAz([1 end],2))')+"]"})
-    
+    sgtitle({"Double Difference as function of time per satellite", "Numbers in brackets gives range for elev and azim"})
     %Give an appropriate amount of subplots for the amount of measurements
     if (length(DD)<(floor(sqrt(length(DD))))*ceil(sqrt((length(DD)))))
         rows=floor(sqrt(length(DD)));
@@ -98,7 +95,7 @@ if sets.plots.DDVec
     for i=1:length(DD)
         subplot(rows, cols, i)
         hold on
-        plot(DD{i}.ToW-tVec(1),DD{i}.DD, '*', 'MarkerSize', 1)
+        plot(DD{i}.ToW-tVec(1),DD{i}.DD, 'MarkerSize', 1)
         plot(DD{i}.ToW-tVec(1), DD{i}.dU*r_true)
         ylabel("satID: "+num2str(DD{i}.satID))
         xlabel("["+ num2str(round(DD{i}.elAz(1,1)))+","+ ...
@@ -192,7 +189,14 @@ if sets.plots.hist
         xlabel(strcat('NED: ',32,  meanstr(1:end-2), '[m]',32, varstr(1:end-2)))
     end
 end
+end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [distN, distE]=dist(
-dist=@(trueDir, val) [strcmp(strip(trueDir), ["E", "N"])*val];
+
+
+
+function [N, E]=dist(trueDir, val)
+%Get the values in N and E direction from input direction
+dist=[strcmp(strip(trueDir), ["E", "N"])*val];
+N=dist(1);
+E=dist(2);
+end

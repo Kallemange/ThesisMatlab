@@ -146,7 +146,7 @@ addpath estGlobalPosition/;
 addpath estGlobalPosition/SatsMove/
 path="Logs/";
 date="Uggleviken0706/";
-SimSettings;
+%SimSettings;
 [eph1, eph2, raw1, raw2] = rSatRawData(path+date+dir);
 %%
 % Calculate distance from pseudorange measurements
@@ -154,17 +154,16 @@ SimSettings;
 %OUT pseudo range distance between reciever ab, unit vector to satellites
 addpath estDFromPr\;
 [t1raw, ~, t0r]     = findFirstLast(raw1, raw2);
-t1idx   =t1raw(1):t1raw(end);
-D=calcDiffPr(raw1,raw2,t1raw);
+D                   = calcDiffPr(raw1,raw2,t1raw, sets);
 
 % Estimate the relative position from the pr-measurements
-%Optimal solution calculated as r=(H'H)\H'D for (x,y,z)
+%Optimal solution calculated as r=(H'*W*H)\H'*W*D for (x,y,z)
 %IN pseudorange distance, directions to satellites
 %OUT time since start, distance in xyz, clock-drift over time
 addpath optimalSolPr\;
-
-[tVec, r_ab, DD, refSat]         = optimalSolPr(D,eph1(1:end-1), sets); 
-plotResultPr(r_ab,tVec, DD, dir, refSat, sets)
+[tVec, r_ab, DD, refSat]         = optimalSolPr(D,eph1, sets); 
+%Plot results from calculations performed above
+plotResultDD(r_ab,tVec, DD, dir, refSat, sets)
 %% Part 5 Estimate global position
 addpath('SatsMove/')
 addpath('../data');
@@ -174,12 +173,17 @@ path="Logs/Uggleviken";
 date="0706/";
 dir="E";
 [eph1, eph2, raw1, raw2] = rSatRawData(path+date+dir);
-gps1=readtable(path+date+dir+"1/gps.csv");
-gps2=readtable(path+date+dir+"2/gps.csv");
+if isfile(path+date+dir+"1/gps.csv")
+    gps1=readtable(path+date+dir+"1/gps.csv");
+    gps2=readtable(path+date+dir+"2/gps.csv");
+else
+    gps1=readtable(path+date+dir+"1/ins.csv");
+    gps2=readtable(path+date+dir+"2/ins.csv");
+end
+%%
 %compute the position based on the observation and ephmeris data 
 % x=estGlobalPos([raw data], [ephemeris data], [step size](default=5), [t_end] (default=all))
-%%
-x1=estGlobalPos(raw1,eph1,1, 0, 0, 15, 1);
-x2=estGlobalPos(raw2,eph2,1, 0, 0, 15, 1);
+x1=estGlobalPos(raw1,eph1, sets);
+x2=estGlobalPos(raw2,eph2, sets);
 %%
 plot_global_estimate(x1, x2, gps1, gps2, sets)

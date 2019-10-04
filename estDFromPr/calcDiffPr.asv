@@ -1,4 +1,4 @@
-function dPr=calcDiffPr(r1,r2,t1, sets)
+function dPr=calcDiffPr(r1,r2,t1)
 %{
 Calculation of the difference in pseudorange per each measurement. For each
 matching sv: dP:=r1.P1-r2.P2. If times not equal, r1.ToW(i)=\=r2.ToW(j) for some i,j, 
@@ -88,3 +88,63 @@ for i=t1(1):t1(2)
 end
 dPr(idx_to_remove)=[];
 end
+% 
+% function b=adjustForB(r,eph, week, sets)
+%     xu      = [0 0 0];
+%     c       = 299792458;        % Speed of light
+%     omega_e = 7.2921151467e-5;  % Earth's rotation rate [rad/sec]
+%     b       = 0;
+%     I =@(var) find(["sat", "SNR", "LLI", "code", "P"]==var);
+%     [~, t]          = UTC_in_sec2GPStime(r.ToW, week); %Time conversion [POSIX->GPST]
+%     
+%     %Extract those measurements in raw and eph where data correspond for epoch
+%     raw_t           = sortrows(r.data, I("sat"));
+%     [~, iR, iE]     = intersect(raw_t(:,I("sat")),[eph(:).sat]);
+%     obs             = raw_t(iR,I("P"));
+%     eph_t           = eph(iE);
+%     try
+%         [eph_t, obs]    = satElevMask(eph_t,obs, t, sets.posECEF, sets.optSol.elMask); %Remove sats below elevMask
+%     catch
+%         keyboard
+%     end
+%     if length(obs)<4 %Minimum 4 sats used to calculate position and clock bias
+%         return
+%     end
+%     dsv = zeros(size(eph_t));
+%     for j=1:length(eph_t)
+%         dsv(j) = estimate_satellite_clock_bias(t, eph_t(j));   
+%     end 
+%     obsAdj=obs+dsv'*c;
+%     dx = 100*ones(1,3); db = 100;
+%     while(norm(dx) > 0.1 && norm(db) > 1)
+%         Xs = zeros(length(eph_t),3);    % Satellite position matrix
+%         pr = zeros(length(eph_t),1);    % Corrected obs wrt receiver clock bias
+%         for k=1:length(eph_t)
+%             cpr = obsAdj(k) - b;        % Adjust observation for current estimate of receiver clock bias.
+%             pr(k) = cpr;                % Store updated value
+%             tau = cpr/c;                % Signal transmission time
+%             [xs_, ys_, zs_]=get_satellite_position(eph_t(k),t-tau,1);
+%             theta = omega_e*tau;        % Earth's rotation in tau seconds
+%             xs_vec = [cos(theta) sin(theta) 0; -sin(theta) cos(theta) 0; 0 0 1]*[xs_; ys_; zs_];
+%             Xs(k,:)=xs_vec';            % Store satellite position
+%         end
+%         [x_, b_] = estimate_position(Xs, pr, length(pr), xu, b, 3);
+%         dx = x_ - xu;
+%         db = b_ - b;
+%         xu = x_;
+%         b = b_;
+%     end
+%     b=b/c;
+% end
+% 
+% function [eph, obs] = satElevMask(eph, obs, t, p, elMask)
+% Xs=zeros(length(eph),3);
+% for k=1:length(eph)
+%     [xs_, ys_, zs_]     = get_satellite_position(eph(k),t,1);
+%     xs_vec              = [xs_ ys_ zs_]';
+%     Xs(k,:)             = xs_vec';
+% end
+% [~, el]=ecef2elaz(Xs,p);
+% eph(el<elMask)=[];
+% obs(el<elMask)=[];
+%end
