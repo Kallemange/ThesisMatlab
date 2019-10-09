@@ -1,4 +1,38 @@
 %% Karl Lundin Master thesis project
+close all, clear all, clc
+%%
+%{
+Part1:
+TEST_ESTIMATE_POSITION:
+For a given type of input noise, an error will be produced in the output
+data. The behaviour is plotted in two kinds of graphs, investigating the
+error in position estimate and clock bias estimate.
+    1) How the error changes with an increasing error in input of given
+    noise type, as well as the clock bias estimate.
+    2) How the solution converges per iteration for both position and clock
+    bias estimate.
+
+How to run:
+1) Load data
+2) Create starting positions for receiver and satellites
+3) Test the output of the simulations, either testing output or convergence
+as specified by providing argument 'convergence'
+--------------------------------------------------------------------------
+Part 2: Relative position histograms from internal solution.
+Plots histogram over indivudual estimates, using receiver 1 as reference 
+position x0, as well as histogram over distance between estimated position 
+between receivers. This is based on sampling estimates directly from
+receiver, meaning that the position is at all times given by receiver
+--------------------------------------------------------------------------
+Part 3: Test magnitude between theoretical distance receiver<-->satellite
+and measured. 
+--------------------------------------------------------------------------
+Part 4: Test Delta P over time for double differentiated satellite
+measurements
+Values of the distance between receivers should be in the range ±10 m
+If values wa
+--------------------------------------------------------------------------
+Part 5: Test global position estimate
 
 %% Part1 
 %Estimating the relative positions and the drift over time utilizing
@@ -6,151 +40,88 @@
 %Several measurements were made, with stationary and moving recievers,
 %The relative positional estimates are presented based on the data from the
 %IS units own calculations
-close all, clear all, clc
-%% Measurements from INS-log at stationary 1m
-%{
-T1=readtable('Uggleviken0312/1m1/Ins.csv');
-T2=readtable('Uggleviken0312/1m2/Ins.csv');
-%% 
-relativeGPSPosINS(T1,T2, 'ned', 1, 1 );
-%% Measurements from INS-log at stationary 2m
-close all, clear all, clc
-T1=readtable('Uggleviken0312/2m1/Ins.csv');
-T2=readtable('Uggleviken0312/2m2/Ins.csv');
-%%
-relativeGPSPosINS(T1,T2, 'lla', 1, 2 );
-%% Measurements from INS-log at stationary 7m
-close all, clear all, clc
-T1=readtable('Uggleviken0312/7m1/Ins.csv');
-T2=readtable('Uggleviken0312/7m2/Ins.csv');
-%%
-relativeGPSPosINS(T1,T2, 'lla', 1, 7);
-%% Measurements from INS-log while walking around
-close all, clear all, clc
-T1=readtable('Uggleviken0312/prom1/Ins.csv');
-T2=readtable('Uggleviken0312/prom2/Ins.csv');
-%%
-relativeGPSPosINS(T1,T2, 'lla', 1, 0.5);
-%% Measurements from INS-log with receivers aligned in N-direction
-T2=readtable('Uggleviken0327/0327_N1/Ins.csv');
-T1=readtable('Uggleviken0327/0327_N2/Ins.csv');
-%%
-relativeGPSPosINS(T1,T2, 'lla', 1, 1.6);
-%% Measurements from INS-log with receivers aligned in E-direction
-T2=readtable('Uggleviken0327/0327_E1/Ins.csv');
-T1=readtable('Uggleviken0327/0327_E2/Ins.csv');
-%%
-relativeGPSPosINS(T1,T2, 'lla', 1, 1.6);
-%% Measurements from INS-log with receivers aligned in D-direction
-T2=readtable('Uggleviken0327/0327_D1/Ins.csv');
-T1=readtable('Uggleviken0327/0327_D2/Ins.csv');
-%%
-relativeGPSPosINS(T1,T2, 'lla', 1, 1.6);
-%}
-%% Measurements from INS-log with receivers aligned in E-direction 10 m
-T2=readtable('Uggleviken0411/E1/Ins.csv');
-T1=readtable('Uggleviken0411/E2/Ins.csv');
-%%
-addpath('Old functions\')
-relativeGPSPosINS(T1,T2, 'ned', 1, 10, 2);
-%% Measurements from INS-log with receivers aligned in N-direction 10 m
-T2=readtable('Uggleviken0411/N1/Ins.csv');
-T1=readtable('Uggleviken0411/N2/Ins.csv');
-%%
-relativeGPSPosINS(T1,T2, 'lla', 1, 10, 1);
-%% Part 2
-%Estimating the position of the sensors using the satellite information
-%directions, and the pseudorange measurements
-close all, clear all, clc
-%% From sampling in uggleviken 0312 
-%{
-[sat1 sat2 raw1 raw2] = rSatRawData('Uggleviken0312/','1m');
-%%
-[sat1 sat2 raw1 raw2] = rSatRawData('Uggleviken0312/','2m');
-%%
-[sat1 sat2 raw1 raw2] = rSatRawData('Uggleviken0312/','7m');
-%%
-[sat1 sat2 raw1 raw2] = rSatRawData('Uggleviken0312/','prom');
-%% From sampling in uggleviken 0327 
-dir = 'N';
-[sat1 sat2 raw1 raw2] = rSatRawData('Uggleviken0327/','0327_N');
-%%
-dir = 'E';
-[sat1 sat2 raw1 raw2] = rSatRawData('Uggleviken0327/','0327_E');
-%%
-dir =' D';
-[sat1 sat2 raw1 raw2] = rSatRawData('Uggleviken0327/','0327_D');
-%}
-%% Load all data from logfiles
-dir =' N'; addpath rSatRawData\;
-path="Logs/";
-date="Uggleviken0411/";
-[sat1 sat2 raw1 raw2] = rSatRawData(path+date,"N");
-%%
-addpath rSatRawData\;
-dir ="E"; 
-date="Uggleviken0411/";
-path="Logs/"+date+dir;
-[eph1, eph2,raw1 raw2] = rSatRawData(path)
-%% Or load them from a .mat file
-%Stationary receivers at 10m separation in N or E direction
-%load('10mN')
-%load('10mE')
-dir =' E'; addpath rSatRawData\;
-%%
-dir =' N'; addpath rSatRawData\;
-path="Logs/";
-date="Uggleviken0706/";
-[sat1 sat2 raw1 raw2] = rSatRawData(path+date,"N");
-%% My own simulated data
-addpath simulateRawData\;
-dir='N'
-load GPSdata.mat;
-trueNED=ref_data.traj_ned;
-[sat1 sat2 raw1 raw2] = simulateRawData();
-%% Simulated data from real GPS positions
-%SimSettings
-addpath simulateRawData\;
-%addpath gnss_task\;
-dir ='N';
-t0=1.555058801792000e+09;
-[sat1 sat2 raw1 raw2] = simulateMain(t0, sets);
-%%
-% Read log files and load to memory as struct
-%IN: 
-% Path to log files
-% Direction of experiment setup
-%OUT:
-% eph, struct[]:  ephemeris data from receivers 1 and 2
-% raw, struct[]:  observation data from receivers 1 and 2
 
-dir ="E"; 
-addpath rSatRawData\;
+%}
+%% Load Data
 addpath('estGlobalPosition/')
-path="Logs/";
-date="Uggleviken0706/";
+addpath('estGlobalPosition/SatsMove/')
+addpath('Simulations/GlobalPosEstimate')
+addpath('rSatRawData/')
+addpath('Simulations/')
 SimSettings;
+path="Logs/Uggleviken";
+date="0706/";
+dir="E";
 [eph1, eph2, raw1, raw2] = rSatRawData(path+date+dir);
-%%
+addpath('SatsMove/')
+addpath('../data');
+addpath("../Logs");
+[gps1, gps2, p1, p2]=loadGPSLog(path+date+dir);
 
-% Calculate difference between pseudorange measurements
-%IN 
-% raw data[2]
-% t1raw, double[2]: first and last usable index for differenced obs
-%OUT 
-%D, struct[]:   Observation difference data, containing fields:
-%   dp:    (single) differenced pr value
-%   sat:   corresponding satellite ID
-%   ToW:   time of week (GPST [s])
+%% Create the starting position and satellite positions 
+%Positions of satellites and receivers
+in.pRec=p1;
+eph=eph1;
+pSat=satPositions(eph, 0);
+[~,elev]=ecef2elaz(pSat,in.pRec);
+in.pSat=pSat(elev>sets.optSol.elMask,:);
+in.eph=eph(elev>sets.optSol.elMask);
+in.pSat=pSat(1:4,:);
+in.eph=eph(1:4);
+clearvars elev pSat eph;
+%Error terms to be included in the simulations
+in.eps.satPos=0; in.eps.recPos=0; in.eps.clockB=0; in.eps.gauss=0; in.eps.timeErr=0;
+%% Testing the output of the simulations for different levels of input noise
+% No noise 
+run_test_estimate_position(in)
+%% Part 2: New plots over relative position from internal solution
+%This plots the histogram of positions with rec1 as reference position p_0, 
+%as well as the histogram of relative position between receivers.
+close all
+log_path=path+date;
+%True distance between receivers
+trueD=10; 
+%True direction between receivers
+direction='E';
+%Logs to use for calculations
+T1=strcat(log_path,'/',direction,'1/gps.csv');
+T2=strcat(log_path,'/',direction,'2/gps.csv');
+plotInternalSolution(T1,T2, trueD, direction, false);
+direction='N';
+T1=strcat(log_path,'/',direction,'1/gps.csv');
+T2=strcat(log_path,'/',direction,'2/gps.csv');
+plotInternalSolution(T1,T2, trueD, direction, false);
+
+%% Part 4 
+%Compute relative position from observation data and own 
+%calculation of satellite position
+
+% Calculate distance from pseudorange measurements
+%IN satellite data[2], raw data[2]
+%OUT pseudo range distance between reciever ab, unit vector to satellites
 addpath estDFromPr\;
-[t1raw, ~, t0r]         = findFirstLast(raw1,raw2);
-t1idx   =t1raw(1):t1raw(end);
-D=calcDiffPr(raw1,raw2,t1raw);
+[t1raw, ~, t0r]     = findFirstLast(raw1, raw2);
+D                   = calcDiffPr(raw1,raw2,t1raw, sets);
 
 % Estimate the relative position from the pr-measurements
-%Optimal solution calculated as r=(H'H)\H'D for (x,y,z)
+%Optimal solution calculated as r=(H'*W*H)\H'*W*D for (x,y,z)
 %IN pseudorange distance, directions to satellites
 %OUT time since start, distance in xyz, clock-drift over time
 addpath optimalSolPr\;
 [tVec, r_ab, DD, refSat]         = optimalSolPr(D,eph1, sets); 
-plotResultPr(r_ab,tVec, DD, dir, refSat, sets)
+%Plot results from calculations performed above
+plotResultDD(r_ab,tVec, DD, dir, refSat, sets)
+%% Part 5 Estimate global position
+%compute the position based on the observation and ephmeris data 
+% x=estGlobalPos([raw data], [ephemeris data], [step size](default=5), [t_end] (default=all))
+x1=estGlobalPos(raw1,eph1, sets, p1);
+x2=estGlobalPos(raw2,eph2, sets, p2);
+%%
+[fig1, fig2, fig3]=plot_global_estimate(x1, x2, gps1, gps2, sets);
+sgtitle(fig1, {"Position difference in NED-coordinates, dist_{true}=10m "+dir+"-dir", ...
+               "x_0:= first reading of receiver 1"})
+sgtitle(fig2, {"Difference obs-||p_{sat}-p_{true}|| per satellite over time",...
+               "obs adjusted for sv and receiver bias"})
+sgtitle(fig3, {"Difference obs-||p_{sat}-p_{est}|| per satellite over time", ...
+               "obs adjusted for sv and receiver bias"})         
+%%           

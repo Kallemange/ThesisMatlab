@@ -17,7 +17,7 @@
 	%              G: user satellite geometry matrix, useful for computing DOPs
     %              xVec: receiver position estimate at each iteration
     %              bVec: clock bias estimate at each iteration
-
+    noIter=1;
 	dx = 100*ones(1, dim);
 	db = 0;
 	norm_dp = 100;
@@ -28,7 +28,8 @@
     end    
     xVec=x0; bVec=b0;
 	%while (norm_dp > 1e-4)
-	while norm(dx) > pres
+	while (norm(dx) > pres &&noIter<10)
+        noIter=noIter+1;
 		norms = sqrt(sum((xs-x0).^2,2));
 		% delta pseudo range:
 		dp = pr - norms + b - b0;

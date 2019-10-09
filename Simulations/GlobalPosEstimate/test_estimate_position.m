@@ -201,7 +201,7 @@ elseif strcmp(convergence, 'convergence')
         elseif strcmp(in.noise, 'recPos')
             b0=1e-15;
         end
-        
+        noIter=1;
         [~, ~,~,~,xVec,bVec]=estimate_position(Xsat, pr, length(pr),x0, b0, 3, pres);
         hold on
         %Adding some special cases for the plots, to show the convergence
