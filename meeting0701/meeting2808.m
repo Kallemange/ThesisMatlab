@@ -167,6 +167,7 @@ plotResultDD(r_ab,tVec, DD, dir, refSat, sets)
 %% Part 5 Estimate global position
 addpath('SatsMove/')
 addpath('../data');
+addpath("../Logs");
 %load allLogData.mat %Contains the raw log data organized in structs
 %load allEstPos.mat %Contains the positional estimate calculations already made
 path="Logs/Uggleviken";
@@ -176,14 +177,27 @@ dir="E";
 if isfile(path+date+dir+"1/gps.csv")
     gps1=readtable(path+date+dir+"1/gps.csv");
     gps2=readtable(path+date+dir+"2/gps.csv");
+    p1=mean([gps1.ecef_0_ gps1.ecef_1_ gps1.ecef_2_]);
+    p2=mean([gps2.ecef_0_ gps2.ecef_1_ gps2.ecef_2_]);
 else
     gps1=readtable(path+date+dir+"1/ins.csv");
     gps2=readtable(path+date+dir+"2/ins.csv");
+    p1=mean(lla2ecef([gps1.lla0 gps1.lla1 gps1.lla2], 'WGS84'));
+    p2=mean(lla2ecef([gps2.lla0 gps2.lla1 gps2.lla2], 'WGS84'));
 end
 %%
 %compute the position based on the observation and ephmeris data 
 % x=estGlobalPos([raw data], [ephemeris data], [step size](default=5), [t_end] (default=all))
-x1=estGlobalPos(raw1,eph1, sets);
-x2=estGlobalPos(raw2,eph2, sets);
+x1=estGlobalPos(raw1,eph1, sets, p1);
+x2=estGlobalPos(raw2,eph2, sets, p2);
 %%
-plot_global_estimate(x1, x2, gps1, gps2, sets)
+[fig1, fig2, fig3]=plot_global_estimate(x1, x2, gps1, gps2, sets);
+sgtitle(fig1, {"Position difference in NED-coordinates, dist_{true}=10m "+dir+"-dir", ...
+               "x_0:= first reading of receiver 1"})
+sgtitle(fig2, {"Difference obs-||p_{sat}-p_{true}|| per satellite over time",...
+               "obs adjusted for sv and receiver bias"})
+sgtitle(fig3, {"Difference obs-||p_{sat}-p_{est}|| per satellite over time", ...
+               "obs adjusted for sv and receiver bias"})         
+%%           
+x1=SVPosGridSearch(raw1,eph1, sets, p1);
+x2=SVPosGridSearch(raw2,eph2, sets, p2);

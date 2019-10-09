@@ -1,4 +1,4 @@
-function out=estGlobalPos(raw, eph, sets)
+function out=estGlobalPos(raw, eph, sets, posRec)
 % Estimate global position from the raw data available in obsd_t and eph_t 
 % calculations based on those presented in 
 % http://www.telesens.co/2017/07/17/calculating-position-from-raw-gps-data/
@@ -37,14 +37,16 @@ function out=estGlobalPos(raw, eph, sets)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Input argument cases
+if nargin<4
+    posRec  = sets.posECEF;
+end
 if (sets.optSol.OnlyGPS) % Remove all non GPS-satellites
-    eph     =eph([eph(:).sat]<=32);
+    eph     =eph([eph(:).sat]<=sets.optSol.satIDMax);
 end
 if ~sets.globalPos.t_end % Final value used in the log
     t_end=length(raw);
 end
 elMask  = sets.optSol.elMask; % Elevation mask for satellites
-posRec  = sets.posECEF;
 h       = sets.globalPos.h;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Constants
@@ -75,6 +77,9 @@ obsVec.obsAdj   = cell(noSats,1);   % Observation adjusted for clock bias [m]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Main calculation loop
 for i=1:h:t_end
+    if (sets.print.Itr &&~mod(i,sets.print.Mod))
+        "iteration "+str(i)
+    end
     [~, t]          = UTC_in_sec2GPStime(raw(i).ToW, week); %Time conversion [POSIX->GPST]
     
     %Extract those measurements in raw and eph where data correspond for epoch
@@ -103,7 +108,7 @@ for i=1:h:t_end
     % 2. Calculate receiver state for satellite positions
     % Reiterate 1 and 2 for updated values until convergence
     dx = 100*ones(1,3); db = 100;
-    while(norm(dx) > 0.1 && norm(db) > 1)
+    while(norm(dx) > 0.1 && norm(db) > 0.1)
         Xs = zeros(length(eph_t),3);    % Satellite position matrix
         pr = zeros(length(eph_t),1);    % Corrected obs wrt receiver clock bias
         for k=1:length(eph_t)
@@ -115,7 +120,8 @@ for i=1:h:t_end
             % express satellite position in ECEF frame at time t
             theta = omega_e*tau;        % Earth's rotation in tau seconds
             xs_vec = [cos(theta) sin(theta) 0; -sin(theta) cos(theta) 0; 0 0 1]*[xs_; ys_; zs_];
-            Xs(k,:)=xs_vec';            % Store satellite position
+            %xs_vec = [xs_; ys_; zs_];
+            Xs(k,:)= xs_vec';            % Store satellite position
         end
         % Estimate position from satellite position and estimates
         [x_, b_] = estimate_position(Xs, pr, length(pr), xu, b, 3);
@@ -134,7 +140,8 @@ for i=1:h:t_end
         n=satIdx_t(m);
         allSatPos.pos{n}(end+1,:)   = [t Xs(m,:)];
         [az, el, dist]              = ecef2elaz(Xs(m,:), posRec);
-        allSatPos.elAz{n}(end+1,:)  = [t, az, el, dist];
+        [~,~,dist_est]              = ecef2elaz(Xs(m,:), xu);
+        allSatPos.elAz{n}(end+1,:)  = [t, az, el, dist, dist_est];
         obsVec.obs{n}(end+1, :)     = [t obs(m)];
         obsVec.obsAdj{n}(end+1,:)   = [t pr(m)];
     end    
@@ -166,8 +173,7 @@ function [eph, obs] = satElevMask(eph, obs, t, p, elMask)
 Xs=zeros(length(eph),3);
 for k=1:length(eph)
     [xs_, ys_, zs_]     = get_satellite_position(eph(k),t,1);
-    xs_vec              = [xs_ ys_ zs_]';
-    Xs(k,:)             = xs_vec';
+    Xs(k,:)              = [xs_ ys_ zs_];
 end
 [~, el]=ecef2elaz(Xs,p);
 eph(el<elMask)=[];

@@ -1,4 +1,4 @@
-function [e1, e2, r1 r2]= rSatRawData(path)
+function [e1, e2, r1, r2]= rSatRawData(path)
 %Read the log data containing satellite directions and 
 %pseudoranges into a cell-struct.
 %IN path, folder name

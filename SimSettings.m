@@ -21,10 +21,11 @@ sets.noise.round=1;             %Round off the value in the elev-azim measuremen
 
 %Which satellite to choose, different functions available.
 %options: minHDOP, median
-sets.optSol.sats='median';     
+%sets.optSol.sats='median';     
 sets.optSol.Weights="SNR";          %Options: "SNR", "elev", "elevSNR" Weighted matrix for LS-solution, possible values 
 sets.optSol.elMask=15;
 sets.optSol.OnlyGPS=1;
+sets.optSol.satIDMax=79;
 
 %Difference related calculations
 sets.diffPr.interpol=0;         %Interpolate readings between obs t- and t+ for observations on rec2
@@ -41,6 +42,7 @@ sets.plots.DDVec=1;             %Double difference vector
 sets.plots.residual=0;          %Residual over reconstruction errors
 sets.plots.var= @(x) (var(x));  
 
+
 %True position (for frames and projection)
 sets.posECEF=[3098534.400000,1011155.550000,5464107.630000];
 sets.poslla=[59.352907,18.073239,31.999000];
@@ -48,3 +50,7 @@ sets.poslla=[59.352907,18.073239,31.999000];
 %Settings related to global position estimate
 sets.globalPos.h=5;
 sets.globalPos.t_end=0;
+
+%Print data settings
+sets.print.Itr=1;
+sets.print.Mod=1000;

@@ -42,12 +42,7 @@
 
 	% Now follow table 20-IV
 	A = eph.A;
-    try
 	cmm = sqrt(mu/A^3); % computed mean motion
-    catch EM
-        
-        keyboard
-    end
 	tk = t - eph.toe;
 	% account for beginning of end of week crossover
 	if (tk > 302400)

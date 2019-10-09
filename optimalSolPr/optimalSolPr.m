@@ -32,7 +32,7 @@ OUT:
 
 %}
 if sets.optSol.OnlyGPS              % If true -> Use only GPS-signals
-    eph=eph([eph(:).sat]<33);
+    eph=eph([eph(:).sat]<sets.optSol.max);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Instantiate data

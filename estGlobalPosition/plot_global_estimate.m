@@ -1,6 +1,13 @@
-function plot_global_estimate(x1, x2, g1, g2, sets)
+function [f1, f2, f3]=plot_global_estimate(x1, x2, g1, g2, sets)
 %Plot the position of the receivers based on the internal solution of the
 %device, as well as the solution calculated through observation data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Plot1
+%Global estimate for receiver 1 and 2, own solution (rec1 & rec2)
+%Global estimate for receiver 1 and 2, internal solution (gps1 and gps2)
+%Plot2
+%Difference in adjusted observation rec-sv and estimated distance rec-sv
+%for rec1 and rec2. (Rec. position given as first reading gps1 and gps2)
 
 %Define reference position in ECEF and LLA-coordinates as the first reading
 %of receiver 1
@@ -31,7 +38,9 @@ else
 end
 dirVec=["N", "E", "D"];
 
-figure
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Plot1
+f1=figure;
 for i=1:3
     subplot(3,1,i)
     hold on
@@ -52,10 +61,46 @@ for i=1:3
             +"g_2:"+num2str(round(mean(g2NED(:,i)),1)));
     ylabel(dirVec(i))
 end
-if sets.optSol.OnlyGPS
-    GPSstr=", only GPS-sv";
-else
-    GPSstr="";
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Figure 2
+f2=figure;
+allsat=unique([x1.satID; x2.satID]);
+distObsNorm(x2, allsat, "true")
+distObsNorm(x1, allsat, "true")
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+f3=figure;
+distObsNorm(x2, allsat, "est")
+distObsNorm(x1, allsat, "est")
+
 end
-sgtitle({"Position difference in NED-coordinates"+GPSstr, ...
-         "x_0 defined as first reading of receiver 1"})
+
+function distObsNorm(x, allsats, idx)
+%Plot the distance between norm-obs where norm:= ||p_sv-p_rec|| and obs is
+%pseudorange observation adjusted for sv and receiver clock bias
+if strcmp(idx, "true")
+    posidx=4;
+elseif strcmp(idx, "est")
+    posidx=5;
+end
+
+[~, imgNo]=intersect(allsats, x.satID);
+obs=x.obsVec.obsAdj;
+    if (length(allsats)<(floor(sqrt(length(allsats))))*ceil(sqrt((length(allsats)))))
+        rows=floor(sqrt(length(allsats)));
+        cols=ceil(sqrt((length(allsats))));
+    else
+        rows=ceil(sqrt((length(allsats))));
+        cols=rows;
+    end
+    for i=1:length(obs)
+        subplot(rows, cols,imgNo(i))
+        if ~isempty(obs{i})
+            hold on
+            plot(obs{i}(:,1)-x.tVec(1),obs{i}(:,2)-x.satPos.elAz{i}(:,posidx))
+        
+        else
+            plot(0)
+        end
+            xlabel("satID: "+string(allsats(i)))    
+    end
+    end
