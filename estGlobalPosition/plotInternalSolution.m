@@ -1,23 +1,19 @@
-function plotInternalSolution(path1, path2, dist, dir, saveToFile)
+function plotInternalSolution(x1, x2, dist, dir, saveToFile)
+%Function to provide plots of global positional fixes from the internal
+%solution of the receivers. Plots are showing:
+%1) Histogram of Global position wrt the mean position of receiver 1 in NED-frame 
+%2) Radial distance over time between receivers
+%3) Distance in NED over time between receivers
 %IN
-%path, string:     .csv file of data convertible to table 
-%path, string:     .csv file of data convertible to table
+%x1, table:        Table containing data from gps/ins log for receiver 1
+%x2, table:        Table containing data from gps/ins log for receiver 2
 %dist, string:     True distance between receivers
 %dir,  string:     Direction of distance receivers (N/E/D)
 %saveToFile, bool: Save figure to file (true for save)
 %saveToFile 
 %OUT
 %N/A
-%Function to provide plots of global positional fixes from the internal
-%solution of the receivers. Plots are showing:
-%1) Histogram of Global position wrt the mean position of receiver 1 in NED-frame 
-%2) Radial distance over time between receivers
-%3) Distance in NED over time between receivers
 
-x1=readtable(path1);
-x2=readtable(path2);
-%x1=x1(1:100,:);
-%x2=x2(1:100,:);
 wgs84 = wgs84Ellipsoid;
 %Transform the position to NED-coordinates wrt the first position of rec1
 [x y z]=ecef2ned(x1.ecef_0_, x1.ecef_1_, x1.ecef_2_,x1.lla_0_(1), x1.lla_1_(1), x1.lla_2_(1), wgs84);
@@ -31,7 +27,7 @@ rec2.t=x2.ToWms;
 labelVec = ['N-direction'; 'E-direction'; 'D-direction'];
 numVec   = ['0', '1', '2'];
 fig=figure;
-sgtitle(strcat('Histogram drift individual estimates, true distance ', 32,num2str(dist),'m in ', 32,dir,'-direction'))
+sgtitle(strcat("Histogram drift individual estimates, true distance ", num2str(dist),"m in ", dir,"-direction"))
 for i=1:3
     subplot(4,1,i)
     histogram(rec1.pos(:,i)-mean(rec1.pos(:,i)),'Normalization','probability', 'DisplayStyle', 'stairs');

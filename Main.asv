@@ -1,6 +1,5 @@
 %% Karl Lundin Master thesis project
 close all, clear all, clc
-%%
 %{
 Part1:
 TEST_ESTIMATE_POSITION:
@@ -25,7 +24,7 @@ between receivers. This is based on sampling estimates directly from
 receiver, meaning that the position is at all times given by receiver
 --------------------------------------------------------------------------
 Part 3: Test magnitude between theoretical distance receiver<-->satellite
-and measured. 
+and measured. (Removed)
 --------------------------------------------------------------------------
 Part 4: Test Delta P over time for double differentiated satellite
 measurements
@@ -33,25 +32,24 @@ Values of the distance between receivers should be in the range ±10 m
 If values wa
 --------------------------------------------------------------------------
 Part 5: Test global position estimate
-
-%% Part1 
-%Estimating the relative positions and the drift over time utilizing
-%the global positions provided by the sensor
-%Several measurements were made, with stationary and moving recievers,
-%The relative positional estimates are presented based on the data from the
-%IS units own calculations
+Estimate the position of the receivers from observation data and
+calculations of satellite positions
 
 %}
-%% Load Data
+
+%% Part 1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Load Data
+SimSettings;
 addpath('estGlobalPosition/')
 addpath('estGlobalPosition/SatsMove/')
 addpath('Simulations/GlobalPosEstimate')
 addpath('rSatRawData/')
 addpath('Simulations/')
-SimSettings;
 path="Logs/Uggleviken";
 date="0706/";
 dir="E";
+trueD=10;
 [eph1, eph2, raw1, raw2] = rSatRawData(path+date+dir);
 addpath('SatsMove/')
 addpath('../data');
@@ -74,25 +72,16 @@ in.eps.satPos=0; in.eps.recPos=0; in.eps.clockB=0; in.eps.gauss=0; in.eps.timeEr
 %% Testing the output of the simulations for different levels of input noise
 % No noise 
 run_test_estimate_position(in)
-%% Part 2: New plots over relative position from internal solution
+
+%% Part 2
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%New plots over relative position from internal solution
 %This plots the histogram of positions with rec1 as reference position p_0, 
 %as well as the histogram of relative position between receivers.
-close all
-log_path=path+date;
-%True distance between receivers
-trueD=10; 
-%True direction between receivers
-direction='E';
-%Logs to use for calculations
-T1=strcat(log_path,'/',direction,'1/gps.csv');
-T2=strcat(log_path,'/',direction,'2/gps.csv');
-plotInternalSolution(T1,T2, trueD, direction, false);
-direction='N';
-T1=strcat(log_path,'/',direction,'1/gps.csv');
-T2=strcat(log_path,'/',direction,'2/gps.csv');
-plotInternalSolution(T1,T2, trueD, direction, false);
+plotInternalSolution(gps1,gps2, trueD, dir, false);
 
 %% Part 4 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Compute relative position from observation data and own 
 %calculation of satellite position
 
@@ -111,45 +100,20 @@ addpath optimalSolPr\;
 [tVec, r_ab, DD, refSat]         = optimalSolPr(D,eph1, sets); 
 %Plot results from calculations performed above
 plotResultDD(r_ab,tVec, DD, dir, refSat, sets)
-%% Part 5 Estimate global position
-%compute the position based on the observation and ephmeris data 
+%% Part 5 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Estimate global position
+% compute the position based on the observation and ephmeris data 
 % x=estGlobalPos([raw data], [ephemeris data], [step size](default=5), [t_end] (default=all))
 x1=estGlobalPos(raw1,eph1, sets, p1);
 x2=estGlobalPos(raw2,eph2, sets, p2);
-%%
+
+%% Plot estimates
 [fig1, fig2, fig3]=plot_global_estimate(x1, x2, gps1, gps2, sets);
 sgtitle(fig1, {"Position difference in NED-coordinates, dist_{true}=10m "+dir+"-dir", ...
                "x_0:= first reading of receiver 1"})
-sgtitle(fig2, {"Difference obs-||p_{sat}-p_{true}|| per satellite over time",...
+           sgtitle("Position difference in ECEF over time per direction")
+sgtitle(fig3, {"Difference obs-||p_{sat}-p_{true}|| per satellite over time",...
                "obs adjusted for sv and receiver bias"})
-sgtitle(fig3, {"Difference obs-||p_{sat}-p_{est}|| per satellite over time", ...
+sgtitle(fig4, {"Difference obs-||p_{sat}-p_{est}|| per satellite over time", ...
                "obs adjusted for sv and receiver bias"})         
-%%           
-x1=SVPosGridSearch(raw1,eph1, sets, p1);
-x2=SVPosGridSearch(raw2,eph2, sets, p2);
-%% Part 2
-%Estimating the position of the sensors using the satellite information
-%directions, and the pseudorange measurements
-%%
-
-% Calculate difference between pseudorange measurements
-%IN 
-% raw data[2]
-% t1raw, double[2]: first and last usable index for differenced obs
-%OUT 
-%D, struct[]:   Observation difference data, containing fields:
-%   dp:    (single) differenced pr value
-%   sat:   corresponding satellite ID
-%   ToW:   time of week (GPST [s])
-addpath estDFromPr\;
-[t1raw, ~, t0r]         = findFirstLast(raw1,raw2);
-t1idx   =t1raw(1):t1raw(end);
-D=calcDiffPr(raw1,raw2,t1raw);
-
-% Estimate the relative position from the pr-measurements
-%Optimal solution calculated as r=(H'H)\H'D for (x,y,z)
-%IN pseudorange distance, directions to satellites
-%OUT time since start, distance in xyz, clock-drift over time
-addpath optimalSolPr\;
-[tVec, r_ab, DD, refSat]         = optimalSolPr(D,eph1, sets); 
-plotResultPr(r_ab,tVec, DD, dir, refSat, sets)

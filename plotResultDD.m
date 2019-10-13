@@ -64,11 +64,11 @@ if sets.plots.distOverT
     for i=1:3
         subplot(4,1,i)
         hold on
-        plot(tVec,r_abNED(i,:))
-        plot(tVec,posOverTime(i,:))
-        xlabel(strcat(NEDvec(i), '-direction, mean: ', ...
-                num2str(mean(r_abNED(i,:))),32, 'and cumulative sum' ...       
-        ))
+        plot(tVec-tVec(1),r_abNED(i,:))
+        plot(tVec-tVec(1),posOverTime(i,:))
+        ylabel("\Delta"+NEDvec(i))
+        xlabel(NEDvec(i)+ "-direction, mean: "+ num2str(mean(r_abNED(i,:))))
+        legend("$r_"+NEDvec(i)+"$", "$\bar{r}$", 'Interpreter', 'Latex', 'FontSize', 10)
     end
     subplot(414)
     d=vecnorm(r_abNED, 2);
@@ -189,6 +189,17 @@ if sets.plots.hist
         xlabel(strcat('NED: ',32,  meanstr(1:end-2), '[m]',32, varstr(1:end-2)))
     end
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Figure 7
+if sets.plots.refSat
+    figure
+    plot(refSat(:,1)-tVec(1), refSat(:,2))
+    xlabel("Time since startup [s]")
+    ylabel("svID")
+    sgtitle("svID used as reference satellite  for DD per epoch")
+end
+
 end
 
 

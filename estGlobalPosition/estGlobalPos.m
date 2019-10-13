@@ -67,6 +67,7 @@ out.Hvec        = {};               % Receiver satellite geometry DOP-values
 out.llaVec      = [];               % Receiver position in LLA-coordinates
 out.satID       = satID;            % All satID's 
 out.tVec        = [];               % Time of week [GPST]
+out.visSV       = [];
 week            = eph(1).week;      % GPS-week (since Jan 6 1980)
 noSats          = length(eph);      % Number of satellites tracked
 allSatPos.pos   = cell(noSats,1);   % Satellite positions over time [m ECEF]
@@ -152,9 +153,10 @@ for i=1:h:t_end
     out.bVec            = [out.bVec b];
     out.llaVec          = [out.llaVec; ecef2lla(xu, 'WGS84')];
     out.Hvec{end+1}     = calcH(posRec, Xs); %Calculate the DOP-matrix values
+    out.visSV(end+1,:)  = [t length(pr)];
+end
     out.satPos          = allSatPos;
     out.obsVec          = obsVec;
-end
 end
 
 function [eph, obs] = satElevMask(eph, obs, t, p, elMask)

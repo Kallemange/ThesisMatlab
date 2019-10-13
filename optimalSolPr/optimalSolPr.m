@@ -1,4 +1,4 @@
-function [tVec, r_ab, DDVec, refSat]=optimalSolPr(D, eph, sets)
+function [tVec, r_ab, DDVec, refSatVec]=optimalSolPr(D, eph, sets)
 %{
 Calculate the optimal solution in a leat square sense.
 IN:
@@ -39,8 +39,7 @@ end
 i_max=size(D,2);                    % Max value of the distance vector
 r_ab        = zeros(3,i_max);       % Distance vector between receivers
 tVec        = zeros(1,i_max);       % Time vector
-refSat.ID   = [];                   % Information on which sv is used for reference
-refSat.elAz = [];                   % and corresponding el-az data
+refSatVec   = [];                   % Information on which sv is used for reference
 DDVec=cell(eph(end).sat,1);         % Create cell array to get Double difference over time
 
 for i=1:length(D)
@@ -60,7 +59,7 @@ for i=1:length(D)
     % Find reference satellite for the epoch
     sat_idx=find(D_i.SNR==max(D_i.SNR), 1, 'first');
     refSat=D_i.sat(sat_idx);
-    
+    refSatVec(end+1,:)=[D_i.ToW,refSat];
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Create all the el-az values for the satellites, to reference with what
     %it should be in the readings as well as sorting out the low sats

@@ -17,7 +17,8 @@ while ischar(tline)
         line2(i)=str2num(line(i));
     end
     line2(isnan(line2))=0;
-    line2([11 13 15])=posix2GPSTime(line2([11 13 15]));
+    week=str2num(line(titles==".week"));
+    [~, line2([11 13 15])]=UTC_in_sec2GPStime(line2([11 13 15]), week);
     line=removeGtimeVal(line2, titles);
     for j=3:length(line)-1
         temp=char(titles(j));
@@ -28,6 +29,7 @@ while ischar(tline)
         eph(obs.sat)=obs;
     elseif(isempty(eph(obs.sat).sat))
         eph(obs.sat)=obs;
+        
     %I'll remove this version for now, since it's making things complicated
     %but will later possibly be in use to use the most accurate ephmeris
     %data. For now it's enough to have the first measurement of all
@@ -59,6 +61,7 @@ t(t==".toc.time")=".toc";
 t(t==".toc.sec")=[];
 t(t==".ttr.time")=".ttr";
 t(t==".ttr.sec")=[];
+
 function tVec=posix2GPSTime(t)
 %Update time format from posix (since 1970 -> time in week and s)
 tVec=zeros(1,length(t));
@@ -73,9 +76,9 @@ end
 
 function l=removeGtimeVal(l, t)
 %Add the values of toe1+toe2, toc1+toc2, ttr1+ttr2, remove all 2:s
-l(11)=l(11)+l(12);
-l(13)=l(13)+l(14);
-l(15)=l(15)+l(16);
+%l(11)=l(11)+l(12);
+%l(13)=l(13)+l(14);
+%l(15)=l(15)+l(16);
 l([12 14 16])=[];
 
 

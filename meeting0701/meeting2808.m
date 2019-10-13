@@ -40,9 +40,6 @@ addpath('../estGlobalPosition/')
 addpath('../estGlobalPosition/SatsMove/')
 addpath('../data');
 addpath('../Simulations/GlobalPosEstimate')
-%%
-load allLogData.mat
-load allEstPos.mat
 %% Create the starting position and satellite positions 
 %Positions of satellites and receivers
 in.pRec=[gpsData0706.ecef_0_(1) gpsData0706.ecef_1_(1) gpsData0706.ecef_2_(1)];
@@ -69,8 +66,6 @@ test_estimate_position(in);
 % Satellite position error (time conversion)
 in.noise='clockErr';
 test_estimate_position(in);
-% Receiver positon error
-%in.noise='recPos';
 %test_estimate_position(in);
 % Gaussian noise
 in.noise='gauss';

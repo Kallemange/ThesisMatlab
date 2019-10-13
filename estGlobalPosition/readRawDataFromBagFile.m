@@ -49,33 +49,11 @@ while ischar(tline)
                end
                
             end
-            obs.data=sortrows(table(sat, P), 1);
+            %obs.data=sortrows(table(sat, P), 1);
+            obs.data=sortrows([sat,zeros(length(sat),3)  P], 1);
             raw(index)=obs;
             index=index+1;
         end
-%         line=strsplit(tline, ',');
-%         obs.ToW=str2num(line{3})+str2num(line{4});
-%         tline=fgetl(fid);
-%         while(isepmty(strfind(tline, ']')))
-%             keyboard
-%         end
-            
-%     for j=1:L
-%         obs.(titles(j))=line(j);
-%     end
-%     %Initiate the struct-array or expand if needed
-%     if (~exist('eph')||obs.sat>length(eph))
-%         eph(obs.sat)=obs;
-%     elseif(isempty(eph(obs.sat).sat))
-%         eph(obs.sat)=obs;
-    %I'll remove this version for now, since it's making things complicated
-    %but will later possibly be in use to use the most accurate ephmeris
-    %data. For now it's enough to have the first measurement of all
-    %else
-    %    for k=1:L
-    %    eph(obs.sat).(titles(k))=[eph(obs.sat).(titles(k)) obs.(titles(k))]
-    %    end   
-    
     catch ME
         keyboard
         fclose(fid);
