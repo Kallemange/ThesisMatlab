@@ -54,8 +54,8 @@ if isGPS
 else
     g1NED=[g1.ned0 g1.ned1 g1.ned2]-[g1.ned0(1) g1.ned1(1) g1.ned2(1)];
     g2NED=[g2.ned0 g2.ned1 g2.ned2]-[g2.ned0(1) g2.ned1(1) g2.ned2(1)];
-    g1ECEF=lla2ecef([g1.lla0 g1.lla1 g1.lla2], 'wgs84');
-    g2ECEF=lla2ecef([g2.lla0 g2.lla1 g2.lla2], 'wgs84');
+    g1ECEF=[g1.ned0 g1.ned1 g1.ned2];
+    g2ECEF=[g2.ned0 g2.ned1 g2.ned2];
 end
 dirVec=["N", "E", "D"];
 
@@ -181,9 +181,7 @@ elseif any(strcmp(g1.Properties.VariableNames, "timeOfWeek"))
     g2_.y       = g2.ned1;
     g2_.z       = g2.ned2;
 end
-g1_out=zeros(t1(2)-t1(1), 3);
-g2_out=zeros(t1(2)-t1(1), 3);
-idx_to_remove=[];
+t0=tic;
 for i=t1(1):t1(2)
     t=g1_.ToW(i);
     g1_t    = [g1_.x(i) g1_.y(i) g1_.z(i)];
@@ -199,7 +197,6 @@ for i=t1(1):t1(2)
     % Calculate the distance between observation in time, if both r2
     % low and high >threshold -> discard observation
     if (all(abs([g2t_low g2t_high]-t)>0.2))
-        idx_to_remove(end+1)=i;
         continue
     end
     if (g2t_low==g2t_high)
@@ -210,12 +207,10 @@ for i=t1(1):t1(2)
     if (sum(w)~=1||any(w<0))
         keyboard
     end
-    g2_out(i,:) = sum([g2_.x(k:k+1) g2_.y(k:k+1) g2_.z(k:k+1)].* ...
+    g2_out(end+1,:) = sum([g2_.x(k:k+1) g2_.y(k:k+1) g2_.z(k:k+1)].* ...
                                  [w(2)*ones(1,3); w(1)*ones(1,3)]);
-    g1_out(i,:) = g1_t;
+    g1_out(end+1,:) = g1_t;
 end
-g1_out(idx_to_remove,:)=[];
-g2_out(idx_to_remove,:)=[];
 end
 function [t1idx, t2idx]=findT0toEnd(T1, T2)
 t0          = max(T1(1),T2(1));

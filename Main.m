@@ -47,10 +47,12 @@ addpath('Simulations/GlobalPosEstimate')
 addpath('rSatRawData/')
 addpath('Simulations/')
 path="Logs/Uggleviken";
-date="0706/";
+date="0411/";
 dir="E";
+sets.path=path+date+dir;
 trueD=10;
-[eph1, eph2, raw1, raw2] = rSatRawData(path+date+dir);
+[eph1, eph2] = rEphData(path+date+dir);
+[raw1, raw2] = rRawData(path+date+dir);
 addpath('SatsMove/')
 addpath('../data');
 addpath("../Logs");

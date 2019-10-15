@@ -53,3 +53,6 @@ sets.globalPos.t_end=0;         %Final epoch (0 equals all epochs)
 %Print data settings
 sets.print.Itr=0;               %If print is made (only to check progress)
 sets.print.Mod=1000;            %Frequency of printout
+
+%Path to the correct log
+sets.path=0;

@@ -25,13 +25,8 @@ while ischar(tline)
         eph(obs.sat)=obs;
     elseif(isempty(eph(obs.sat).sat))
         eph(obs.sat)=obs;
-    %I'll remove this version for now, since it's making things complicated
-    %but will later possibly be in use to use the most accurate ephmeris
-    %data. For now it's enough to have the first measurement of all
-    %else
-    %    for k=1:L
-    %    eph(obs.sat).(titles(k))=[eph(obs.sat).(titles(k)) obs.(titles(k))]
-    %    end   
+    else 
+        %eph(obs.sat)=obs; %Only include the latest version in the eph-data
     end
     catch ME
         fclose(fid);

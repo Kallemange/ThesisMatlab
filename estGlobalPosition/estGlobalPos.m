@@ -82,7 +82,6 @@ for i=1:h:t_end
         "iteration "+str(i)
     end
     [~, t]          = UTC_in_sec2GPStime(raw(i).ToW, week); %Time conversion [POSIX->GPST]
-    
     %Extract those measurements in raw and eph where data correspond for epoch
     raw_t           = sortrows(raw(i).data, I("sat"));
     [~, iR, iE]     = intersect(raw_t(:,I("sat")),satID);
