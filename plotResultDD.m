@@ -96,7 +96,7 @@ if sets.plots.DDVec
         subplot(rows, cols, i)
         hold on
         plot(DD{i}.ToW-tVec(1),DD{i}.DD, 'MarkerSize', 1)
-        %plot(DD{i}.ToW-tVec(1), DD{i}.dU*r_true)
+        plot(DD{i}.ToW-tVec(1), DD{i}.dU*r_true)
         ylabel("satID: "+num2str(DD{i}.satID))
         xlabel("["+ num2str(round(DD{i}.elAz(1,1)))+","+ ...
                     num2str(round(DD{i}.elAz(end,1)))+"], [" +...
