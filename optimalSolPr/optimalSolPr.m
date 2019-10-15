@@ -96,7 +96,7 @@ function [elAz, DD, SNR, dU, DD_sats]=remove_low_sats(D, u, az, el, idx, elMask)
     elAz                    = [el(el~=el(idx)),az(az~=az(idx))];
     lowSats                 = elAz(:,1)<elMask;
     DD                      = D.dp-D.dp(idx);
-    SNR                     = D.SNR;
+    SNR                     = D.SNR/4;
     SNR(idx)                = [];
     %Remove that value corresponding to D_j from the solution (D_j-D_j:=0)
     DD(idx)                 = [];

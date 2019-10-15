@@ -86,8 +86,9 @@ for i=1:h:t_end
     raw_t           = sortrows(raw(i).data, I("sat"));
     [~, iR, iE]     = intersect(raw_t(:,I("sat")),satID);
     obs             = raw_t(iR,I("P"));
+    SNR             = raw_t(iR,I("SNR"));
     eph_t           = eph(iE);
-    [eph_t, obs]    = satElevMask(eph_t,obs, t, posRec, elMask); %Remove sats below elevMask
+    [eph_t, obs, SNR]    = satElevMask(eph_t,obs, SNR, t, posRec, elMask); %Remove sats below elevMask
     if length(obs)<4 %Minimum 4 sats used to calculate position and clock bias
         continue
     end
@@ -123,8 +124,9 @@ for i=1:h:t_end
             %xs_vec = [xs_; ys_; zs_];
             Xs(k,:)= xs_vec';            % Store satellite position
         end
+        W=getW(SNR, Xs, posRec, sets);
         % Estimate position from satellite position and estimates
-        [x_, b_] = estimate_position(Xs, pr, length(pr), xu, b, 3);
+        [x_, b_] = estimate_position(Xs, pr, length(pr), xu, b, 3, 1e-3, W);
         % Update position and bias from estimates
         dx = x_ - xu;
         db = b_ - b;
@@ -158,7 +160,7 @@ end
     out.obsVec          = obsVec;
 end
 
-function [eph, obs] = satElevMask(eph, obs, t, p, elMask)
+function [eph, obs, SNR] = satElevMask(eph, obs, SNR, t, p, elMask)
 %Rough elevation mask to remove readings at a low elevation.
 %This does not take the clock bias and transmission time into account due
 %to the fact of satellite position changing slowly
@@ -179,5 +181,34 @@ end
 [~, el]=ecef2elaz(Xs,p);
 eph(el<elMask)=[];
 obs(el<elMask)=[];
+SNR(el<elMask)=[];
 end
 
+function W=getW(SNR, Xs, p, sets)
+%Weighting scheme for satellite global positioning, described in
+%Weighting models for GPS Pseudorange observations forland transportation in urban canyons
+%IN:
+    % SNR, double[]:    SNR value of sv signal
+    % Xs, double[][3]:  Satellite position (ecef)
+    % p, double[3]:     Receiver position (ecef)
+    % sets, struct:     Simulation settings (use sets.globalPos.weights)
+%OUT:
+    % W, double[n][n]:  Diagonal matrix with weights
+%Note: SNR given in 0.25dB, so is divided by 4
+
+switch sets.globalPos.weights
+    case "SNRelev"
+        [~, el]=ecef2elaz(Xs, p);
+        sigma=10.^(-0.1*SNR/4)./sind(el).^2;
+        W=diag(1./sigma);
+    case "SNR"
+        sigma=10.^(-0.1*SNR/4);
+        W=diag(1./sigma);
+    case "elev"
+        [~, el]=ecef2elaz(Xs, p);
+        sigma=sind(el).^2;
+        W=diag(sigma);
+    otherwise
+        W=1;
+end     
+end

@@ -41,18 +41,13 @@ if nargin<4
     posRec  = sets.posECEF;
 end
 if (sets.optSol.OnlyGPS) % Remove all non GPS-satellites
-    validSats=cellfun(@(x) x.sat, eph)<=sets.optSol.satIDMax;
-    eph     =eph(validSats);
-    clear validSats;
+    eph     =eph([eph(:).sat]<=sets.optSol.satIDMax);
 end
 if ~sets.globalPos.t_end % Final value used in the log
     t_end=length(raw);
 end
 elMask  = sets.optSol.elMask; % Elevation mask for satellites
 h       = sets.globalPos.h;
-eph_idx.Id      = ones(size(eph));
-eph_idx.MaxId   = cellfun(@(x) length(x), eph);
-week            = eph{1}(1).week;               % GPS-week (since Jan 6 1980)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Constants
 c       = 299792458;        % Speed of light
@@ -63,21 +58,22 @@ omega_e = 7.2921151467e-5;  % Earth's rotation rate [rad/sec]
 I =@(var) find(["sat", "SNR", "LLI", "code", "P"]==var);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Instatiation of data 
-xu              = [0 0 0];                      % Initial position of the user
-b               = 0;                            % Initial clock bias
-satID           = cellfun(@(x) x.sat, eph)';    % Get all the svID's available in the eph-data for referencing
-out.bVec        = [];                           % Receiver clock bias per iteration
-out.xVec        = [];                           % Receiver position in ECEF-coordinates
-out.Hvec        = {};                           % Receiver satellite geometry DOP-values
-out.llaVec      = [];                           % Receiver position in LLA-coordinates
-out.satID       = satID;                        % All satID's 
-out.tVec        = [];                           % Time of week [GPST]
-out.visSV       = [];                           % Number of visible sv per epoch
-noSats          = length(eph);                  % Number of satellites tracked
-allSatPos.pos   = cell(noSats,1);               % Satellite positions over time [m ECEF]
-allSatPos.elAz  = cell(noSats,1);               % Satellite position over time [m EL-AZ]
-obsVec.obs      = cell(noSats,1);               % Raw observation [m]
-obsVec.obsAdj   = cell(noSats,1);               % Observation adjusted for clock bias [m]
+xu              = [0 0 0];          % Initial position of the user
+b               = 0;                % Initial clock bias
+satID           = [eph(:).sat]';    % Get all the svID's available in the eph-data for referencing
+out.bVec        = [];               % Receiver clock bias per iteration
+out.xVec        = [];               % Receiver position in ECEF-coordinates
+out.Hvec        = {};               % Receiver satellite geometry DOP-values
+out.llaVec      = [];               % Receiver position in LLA-coordinates
+out.satID       = satID;            % All satID's 
+out.tVec        = [];               % Time of week [GPST]
+out.visSV       = [];
+week            = eph(1).week;      % GPS-week (since Jan 6 1980)
+noSats          = length(eph);      % Number of satellites tracked
+allSatPos.pos   = cell(noSats,1);   % Satellite positions over time [m ECEF]
+allSatPos.elAz  = cell(noSats,1);   % Satellite position over time [m EL-AZ]
+obsVec.obs      = cell(noSats,1);   % Raw observation [m]
+obsVec.obsAdj   = cell(noSats,1);   % Observation adjusted for clock bias [m]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Main calculation loop
@@ -86,12 +82,13 @@ for i=1:h:t_end
         "iteration "+str(i)
     end
     [~, t]          = UTC_in_sec2GPStime(raw(i).ToW, week); %Time conversion [POSIX->GPST]
-    
     %Extract those measurements in raw and eph where data correspond for epoch
     raw_t           = sortrows(raw(i).data, I("sat"));
-    [eph_t, iR, iE] = getClosestEph(eph,t,raw_t, eph_idx);
+    [~, iR, iE]     = intersect(raw_t(:,I("sat")),satID);
     obs             = raw_t(iR,I("P"));
-    [eph_t, obs]    = satElevMask(eph_t,obs, t, posRec, elMask); %Remove sats below elevMask
+    SNR             = raw_t(iR,I("SNR"));
+    eph_t           = eph(iE);
+    [eph_t, obs, SNR]    = satElevMask(eph_t,obs, SNR, t, posRec, elMask); %Remove sats below elevMask
     if length(obs)<4 %Minimum 4 sats used to calculate position and clock bias
         continue
     end
@@ -127,8 +124,9 @@ for i=1:h:t_end
             %xs_vec = [xs_; ys_; zs_];
             Xs(k,:)= xs_vec';            % Store satellite position
         end
+        W=getW(SNR, Xs, posRec, sets);
         % Estimate position from satellite position and estimates
-        [x_, b_] = estimate_position(Xs, pr, length(pr), xu, b, 3);
+        [x_, b_] = estimate_position(Xs, pr, length(pr), xu, b, 3, 1e-3, W);
         % Update position and bias from estimates
         dx = x_ - xu;
         db = b_ - b;
@@ -139,7 +137,7 @@ for i=1:h:t_end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Store positions of satellites and observations at time of observation
     % in cell struct
-    [~, ~, satIdx_t]=intersect([eph_t(:).sat],satID);
+    [~, ~, satIdx_t]=intersect([eph_t(:).sat],[eph(:).sat]);
     for m=1:length(satIdx_t)
         n=satIdx_t(m);
         allSatPos.pos{n}(end+1,:)   = [t Xs(m,:)];
@@ -162,31 +160,7 @@ end
     out.obsVec          = obsVec;
 end
 
-function [eph_t, iR, iE]=getClosestEph(eph,t,raw, eph_idx)
-%Find the last valid ephemeris transmission, meaning the last transmission
-%that is still sent before observation is made.
-%IN:
-%   eph, cell[]: all ephemeris transmissions per satellite
-%   
-eph_t={}; 
-iR=[];
-iE=[];
-for i=1:length(eph)
-    idx=find([eph{i}.ttr]<t, 1, 'last');
-    if ~isempty(idx)
-        eph_t{end+1}=eph{i}(idx);
-        eph_idx.Id(i)=idx;
-    end
-end
-eph_t=[eph_t{:}];
-if ~isempty(eph_t)
-    [~, iR, iE]     = intersect(raw(:,1), [eph_t.sat]);
-    eph_t           = eph_t(iE);
-end
-
-end
-
-function [eph, obs] = satElevMask(eph, obs, t, p, elMask)
+function [eph, obs, SNR] = satElevMask(eph, obs, SNR, t, p, elMask)
 %Rough elevation mask to remove readings at a low elevation.
 %This does not take the clock bias and transmission time into account due
 %to the fact of satellite position changing slowly
@@ -207,5 +181,29 @@ end
 [~, el]=ecef2elaz(Xs,p);
 eph(el<elMask)=[];
 obs(el<elMask)=[];
+SNR(el<elMask)=[];
 end
 
+function W=getW(SNR, Xs, p, sets)
+%Weighting scheme for satellite global positioning, described in
+%Weighting models for GPS Pseudorange observations forland transportation in urban canyons
+%IN:
+    %SNR, double[]: SNR value of sv 
+%Note: SNR given in 0.25dB, so is divided by 4
+
+switch sets.globalPos.weights
+    case "SNRelev"
+        [~, el]=ecef2elaz(Xs, p);
+        sigma=10.^(-0.1*SNR/4)./sind(el).^2;
+        W=diag(1./sigma);
+    case "SNR"
+        sigma=10.^(-0.1*SNR/4);
+        W=diag(1./sigma);
+    case "elev"
+        [~, el]=ecef2elaz(Xs, p);
+        sigma=sind(el).^2;
+        W=diag(sigma);
+    otherwise
+        W=1;
+end     
+end

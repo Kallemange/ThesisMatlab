@@ -49,6 +49,7 @@ sets.poslla=[59.352907,18.073239,31.999000];
 %Settings related to global position estimate
 sets.globalPos.h=5;             %Step size (1 equals all epochs)
 sets.globalPos.t_end=0;         %Final epoch (0 equals all epochs)
+sets.globalPos.weights="SNR";
 
 %Print data settings
 sets.print.Itr=0;               %If print is made (only to check progress)

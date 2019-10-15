@@ -1,4 +1,4 @@
-	function [x, b, norm_dp, G, xVec, bVec] = estimate_position(xs, pr, numSat, x0, b0, dim, pres)
+	function [x, b, norm_dp, G, xVec, bVec] = estimate_position(xs, pr, numSat, x0, b0, dim, pres, W)
 	% estimate_position: estimate the user's position and user clock bias
 	% Usage: [x, b, norm_dp, G] = estimate_position(xs, pr, numSat, x0, b0, dim)
 	% Input Args: xs: satellite position matrix
@@ -9,6 +9,7 @@
 	%             b0: starting point for the user clock bias
 	%             dim: dimensions of the satellite vector. 3 for 3D, 2 for 2D
     %             pres (optional): precision, argument for when iteration stops
+    %             W:    Weight scheme for WLS-calculations
 	% Notes: b and b0 are usually 0 as the current estimate of the clock bias
 	% has already been applied to the input pseudo ranges.
 	% Output Args: x: optimized user position
@@ -34,7 +35,7 @@
 		% delta pseudo range:
 		dp = pr - norms + b - b0;
 		G = [-(xs-x0)./norms ones(numSat,1)];
-		sol = (G'*G)\(G'*dp);
+        sol = (G'*W*G)\(G'*W*dp);
 		dx = sol(1:dim)';
 		db = sol(dim+1);
 		norm_dp = norm(dp);
