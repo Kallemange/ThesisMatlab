@@ -89,7 +89,7 @@ for i=1:h:t_end
     SNR             = raw_t(iR,I("SNR"));
     eph_t           = eph(iE);
     [eph_t, obs, SNR]    = satElevMask(eph_t,obs, SNR, t, posRec, elMask); %Remove sats below elevMask
-    if length(obs)<4 %Minimum 4 sats used to calculate position and clock bias
+    if length(obs)<=4 %Minimum 4 sats used to calculate position and clock bias
         continue
     end
     
@@ -155,6 +155,12 @@ for i=1:h:t_end
     out.llaVec          = [out.llaVec; ecef2lla(xu, 'WGS84')];
     out.Hvec{end+1}     = calcH(posRec, Xs); %Calculate the DOP-matrix values
     out.visSV(end+1,:)  = [t length(pr)];
+%     %Debugging:
+%     if t-out.tVec(1)>=770
+%         [az, el, dist] = ecef2elaz(Xs, posRec);
+%         pr-dist
+%         keyboard
+%     end
 end
     out.satPos          = allSatPos;
     out.obsVec          = obsVec;

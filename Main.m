@@ -47,7 +47,7 @@ addpath('Simulations/GlobalPosEstimate')
 addpath('rSatRawData/')
 addpath('Simulations/')
 path="Logs/Uggleviken";
-date="0706/";
+date="0411/";
 dir="E";
 sets.path=path+date+dir;
 trueD=10;
@@ -72,8 +72,9 @@ clearvars elev pSat eph;
 %Error terms to be included in the simulations
 in.eps.satPos=0; in.eps.recPos=0; in.eps.clockB=0; in.eps.gauss=0; in.eps.timeErr=0;
 %% Testing the output of the simulations for different levels of input noise
-% No noise 
+%Global positions
 run_test_estimate_position(in)
+
 
 %% Part 2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -107,11 +108,15 @@ plotResultDD(r_ab,tVec, DD, dir, refSat, sets)
 % Estimate global position
 % compute the position based on the observation and ephmeris data 
 % x=estGlobalPos([raw data], [ephemeris data], [step size](default=5), [t_end] (default=all))
+%eph2 2 6 12 14 25 32
+%eph1 2 6 12 14 25 32
+%eph1=eph1([5 6 7 11 12]);
+%eph2=eph2([5 6 7 11 12]);
 x1=estGlobalPos(raw1,eph1, sets, p1);
 x2=estGlobalPos(raw2,eph2, sets, p2);
 
 %% Plot estimates
-[fig1, fig2, fig3, fig4]=plot_global_estimate(x1, x2, gps1, gps2, sets);
+[fig1, fig2, fig3, fig4]=plot_global_estimate(x1, x2, gps1, gps2, sets, [eph1.sat], [eph2.sat]);
 sgtitle(fig1, {"Position difference in NED-coordinates, dist_{true}=10m "+dir+"-dir", ...
                "x_0:= first reading of receiver 1"})
 sgtitle(fig2, {"Position difference in ECEF-coordinates, dist_{true}=10m "+dir+"-dir", ...

@@ -23,7 +23,7 @@ sets.noise.round=1;             %Round off the value in the elev-azim measuremen
 sets.optSol.Weights="SNR";      %Options: "SNR", "elev", "elevSNR" Weighted matrix for LS-solution, possible values 
 sets.optSol.elMask=15;          %elevation mask for satellites
 sets.optSol.OnlyGPS=1;          %Switch if only to use GPS-satellites or all (if 1, only ephemeris for svID<satIDMax will be used)
-sets.optSol.satIDMax=79;        %Maximum value of satID used (if OnlyGPS==1)
+sets.optSol.satIDMax=33;        %Maximum value of satID used (if OnlyGPS==1)
 
 %Difference related calculations
 sets.diffPr.interpol=0;         %Interpolate readings between obs t- and t+ for observations on rec2
@@ -34,7 +34,7 @@ sets.plots.isSim=0;             %If run is simulation or not
 sets.plots.hist=1;              %Histogram over estimate distribution
 sets.plots.histPerDir=0;        %Histogram over estimate per direction
 sets.plots.cov=0;               %Covariance matrix satellite-readings 
-sets.plots.posOverT=1;          %Position over time estimate
+sets.plots.posOverT=0;          %Position over time estimate
 sets.plots.distOverT=1;         %Distance over time
 sets.plots.DDVec=1;             %Double difference vector
 sets.plots.residual=0;          %Residual over reconstruction errors
@@ -49,7 +49,7 @@ sets.poslla=[59.352907,18.073239,31.999000];
 %Settings related to global position estimate
 sets.globalPos.h=5;             %Step size (1 equals all epochs)
 sets.globalPos.t_end=0;         %Final epoch (0 equals all epochs)
-sets.globalPos.weights="SNR";
+sets.globalPos.weights="";
 
 %Print data settings
 sets.print.Itr=0;               %If print is made (only to check progress)

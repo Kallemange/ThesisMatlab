@@ -51,11 +51,7 @@ r_abNED=[x, y, z]';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Plot 1
-if (sets.plots.posOverT)
-    for i=2:size(r_abNED,2)
-        posOverTime(:,i)=(r_abNED(:,i)+posOverTime(:,i-1)*(i-1))/i;
-    end
-end
+
 if sets.plots.distOverT
     figure
     hold on
@@ -65,10 +61,16 @@ if sets.plots.distOverT
         subplot(4,1,i)
         hold on
         plot(tVec-tVec(1),r_abNED(i,:))
-        plot(tVec-tVec(1),posOverTime(i,:))
+        if (sets.plots.posOverT)
+            for j=2:size(r_abNED,2)
+                posOverTime(:,j)=(r_abNED(:,j)+posOverTime(:,j-1)*(j-1))/i;
+            end
+            plot(tVec-tVec(1),posOverTime(j,:))
+            legend("$r_"+NEDvec(i)+"$","$\bar{r}$", 'Interpreter', 'Latex', 'FontSize', 10)
+        end
         ylabel("\Delta"+NEDvec(i))
         xlabel(NEDvec(i)+ "-direction, mean: "+ num2str(mean(r_abNED(i,:))))
-        legend("$r_"+NEDvec(i)+"$", "$\bar{r}$", 'Interpreter', 'Latex', 'FontSize', 10)
+        
     end
     subplot(414)
     d=vecnorm(r_abNED, 2);

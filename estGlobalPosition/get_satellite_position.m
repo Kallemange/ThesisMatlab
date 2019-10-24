@@ -1,4 +1,4 @@
-	function [x y z] = get_satellite_position(eph, t, compute_harmonic_correction)
+	function [x, y, z] = get_satellite_position(eph, t, compute_harmonic_correction)
 	% get_satellite_position: computes the position of a satellite at time (t) given the
 	% ephemeris parameters. 
 	% Usage: [x y z] =  get_satellite_position(eph, t, compute_harmonic_correction)

@@ -40,13 +40,15 @@ function test_estimate_position(in, convergence, pres, saveToFile, format)
 
 %Number of steps in iteration for final estimat and convergence order
 if nargin<4
-    saveToFile=0;
-    format='fig';
+    saveToFile=1;
+    format='epsc';
 end
 if nargin<3
     pres=1e-3;
 end
-
+if nargin<2
+    convergence=0;
+end
 
 N=100; N_conv=7;
 c=299792458;
@@ -163,7 +165,7 @@ if (nargin<2||~strcmp(convergence, 'convergence'))
     if strcmp(in.noise, 'clockB')
         plot(noiseMag, bVec*1000/c, 'LineWidth', 4.0)
         hold on
-        plot(noiseMag, noiseVec*1000/c)
+        plot(noiseMag, noiseVec*1000/c, 'k')
         leg=legend("$\Delta \hat{t}$", "$\Delta t$", 'Interpreter', 'latex');
         title(leg,"Clock bias")
     else
@@ -174,6 +176,9 @@ if (nargin<2||~strcmp(convergence, 'convergence'))
     xlabel("noise magnitude")
     %set(gca,'YScale','log')
     if saveToFile
+        if ~isdir("Figures")
+            mkdir("Figures");
+        end
         saveas(fig, strcat('Figures/',figname), format)
     end
 

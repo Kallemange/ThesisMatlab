@@ -1,4 +1,4 @@
-function [f1,f2, f3, f4]=plot_global_estimate(x1, x2, g1, g2, sets)
+function [f1,f2, f3, f4]=plot_global_estimate(x1, x2, g1, g2, sets, eph1, eph2)
 %Plot the position of the receivers based on the internal solution of the
 %device, as well as the solution calculated through observation data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -27,7 +27,7 @@ function [f1,f2, f3, f4]=plot_global_estimate(x1, x2, g1, g2, sets)
 %Plot6
 %Number of used satellites for receiver 1 and 2 per epoch
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 isGPS=any(string(g1.Properties.VariableNames)=="ecef_0_");
 if isGPS
     pE=[g1.ecef_0_(1) g1.ecef_1_(1) g1.ecef_2_(1)];
@@ -111,12 +111,12 @@ end
 %Plot 3
 f3=figure;
 allsat=unique([x1.satID; x2.satID]);
-distObsNorm(x2, allsat, "true")
-distObsNorm(x1, allsat, "true")
+distObsNorm(x2, allsat, "true", "rec1")
+distObsNorm(x1, allsat, "true", "rec2")
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 f4=figure;
-distObsNorm(x2, allsat, "est")
-distObsNorm(x1, allsat, "est")
+distObsNorm(x2, allsat, "est", "rec1")
+distObsNorm(x1, allsat, "est", "rec2")
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Figure 5
@@ -154,6 +154,28 @@ plot(x2.visSV(:,1)-x1.visSV(1),x2.visSV(:,2))
 legend("rec_1", "rec_2")
 xlabel("Time since startup [s]")
 ylabel("#Visible sv")
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Figure 7
+% Plot all sv's active at a given time
+activeSatsPerEpoch(x1,eph1, "rec1")
+activeSatsPerEpoch(x2,eph2, "rec2")
+end
+
+function activeSatsPerEpoch(x,eph, rec)
+figure
+hold on
+legVec="";
+for i=1:length(x.satPos.pos)
+    if ~isempty(x.satPos.pos{i})
+        plot(x.satPos.pos{i}(:,1)-x.tVec(1),i*ones(size(x.satPos.pos{i}(:,1))) , '.')
+        legVec(end+1)=string(num2str(eph(i)));
+    end
+end
+legVec(1)=[];
+leg=legend(legVec);
+sgtitle("All active satellites per epoch "+rec)
+xlabel("Time since startup")
 end
 
 function [g1_out, g2_out]=interpolGPS(g1, g2, t1, t2)
@@ -228,7 +250,7 @@ t1idx       = [t1min t1max];
 t2idx       = [t2min t2max];
 
 end
-function distObsNorm(x, allsats, idx)
+function distObsNorm(x, allsats, idx, recNo)
 %Plot the distance between norm-obs where norm:= ||p_sv-p_rec|| and obs is
 %pseudorange observation adjusted for sv and receiver clock bias
 if strcmp(idx, "true")
@@ -251,7 +273,9 @@ obs=x.obsVec.obsAdj;
         if ~isempty(obs{i})
             hold on
             plot(obs{i}(:,1)-x.tVec(1),obs{i}(:,2)-x.satPos.elAz{i}(:,posidx))
-        
+            if recNo=="rec2"
+                legend("rec1", "rec2")
+            end
         else
             plot(0)
         end

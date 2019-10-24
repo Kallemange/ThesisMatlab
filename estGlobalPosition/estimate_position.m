@@ -18,6 +18,9 @@
 	%              G: user satellite geometry matrix, useful for computing DOPs
     %              xVec: receiver position estimate at each iteration
     %              bVec: clock bias estimate at each iteration
+    if nargin<8
+        W=1;
+    end
     noIter=1;
 	dx = 100*ones(1, dim);
 	db = 0;
