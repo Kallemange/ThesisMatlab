@@ -155,12 +155,6 @@ for i=1:h:t_end
     out.llaVec          = [out.llaVec; ecef2lla(xu, 'WGS84')];
     out.Hvec{end+1}     = calcH(posRec, Xs); %Calculate the DOP-matrix values
     out.visSV(end+1,:)  = [t length(pr)];
-%     %Debugging:
-%     if t-out.tVec(1)>=770
-%         [az, el, dist] = ecef2elaz(Xs, posRec);
-%         pr-dist
-%         keyboard
-%     end
 end
     out.satPos          = allSatPos;
     out.obsVec          = obsVec;

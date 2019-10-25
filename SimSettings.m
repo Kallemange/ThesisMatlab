@@ -40,6 +40,7 @@ sets.plots.DDVec=1;             %Double difference vector
 sets.plots.residual=0;          %Residual over reconstruction errors
 sets.plots.refSat=1;            %Satellite used as reference for DD
 sets.plots.var= @(x) (var(x));  
+sets.plots.global.plotGPS=0;    %Plot the internal solution together with the global position
 
 
 %True position (approx) where logging was made (for frames and projection)

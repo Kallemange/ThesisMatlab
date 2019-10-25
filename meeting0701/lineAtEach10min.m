@@ -1,12 +1,12 @@
 function lineAtEach10min(t0, L, range)
 %Function to add a line at each whole 10 minute period in order to compare
 %with that of the charts available in https://www.gnssplanning.com/#/charts
-secs=60-t0(end);
-mins=9-mod(t0(end-1), 10);
+secs=60-t0.Second;
+mins=9-mod(t0.Minute, 10);
 line_pos=secs/60+mins;
 line(line_pos*ones(2,1), range)
-line_text.min=mod(t0(5)+mins+1, 60);
-line_text.hour=t0(4);
+line_text.min=mod(t0.Minute+mins+1, 60);
+line_text.hour=t0.Hour;
 if line_text.min==0
     line_text.hour=line_text.hour+1;
 end

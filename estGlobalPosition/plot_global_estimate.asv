@@ -71,11 +71,8 @@ for i=1:3
     plot(x1.tVec-x1.tVec(1),x1NED(:,i))
     plot(x2.tVec-x1.tVec(1), x2NED(:,i));
     leg1=["rec1", "rec2"];
-    xlabelStr1="Time since startup [s], mean: "...
-            +"x_1:"+num2str(round(mean(x1NED(:,i)),1))+", " ...
-            +"x_2:"+num2str(round(mean(x2NED(:,i)),1))+", ";
     if sets.plots.global.plotGPS
-        leg1=["rec1", "rec2","gps1", "gps2"];            
+        leg1=["gps1", "gps2"];
         if isGPS
             plot(g1.ToWms/1000-x1.tVec(1), g1NED(:,i))
             plot(g2.ToWms/1000-x1.tVec(1), g2NED(:,i))
@@ -83,14 +80,13 @@ for i=1:3
             plot(g1.timeOfWeek-x1.tVec(1), g1NED(:,i))
             plot(g2.timeOfWeek-x1.tVec(1), g2NED(:,i))
         end
-        xlabelStr1="Time since startup [s], mean: "...
+    end
+    legend(leg1)
+    xlabel("Time since startup [s], mean: "...
             +"x_1:"+num2str(round(mean(x1NED(:,i)),1))+", " ...
             +"x_2:"+num2str(round(mean(x2NED(:,i)),1))+", " ...
             +"g_1:"+num2str(round(mean(g1NED(:,i)),1))+", " ...
-            +"g_2:"+num2str(round(mean(g2NED(:,i)),1));
-    end
-    legend(leg1)
-    xlabel(xlabelStr1)
+            +"g_2:"+num2str(round(mean(g2NED(:,i)),1)));
     ylabel(dirVec(i))
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -102,27 +98,19 @@ for i=1:3
     hold on
     plot(x1.tVec-x1.tVec(1), x1.xVec(:,i)-pE(i))
     plot(x2.tVec-x1.tVec(1), x2.xVec(:,i)-pE(i));
-    legendStr2=["rec1", "rec2"];
-        xlabelStr="Time since startup [s], mean: "...
-            +"x_1:"+num2str(round(mean(x1.xVec(:,i)-pE(i)),1))+", " ...
-            +"x_2:"+num2str(round(mean(x2.xVec(:,i)-pE(i)),1));
-    if sets.plots.global.plotGPS
-        legendStr2=["rec1", "rec2", "gps1", "gps2"];
-        xlabelStr="Time since startup [s], mean: "...
+    if isGPS
+        plot(g1.ToWms/1000-x1.tVec(1), g1ECEF(:,i)-pE(i))
+        plot(g2.ToWms/1000-x1.tVec(1), g2ECEF(:,i)-pE(i))
+    else
+        plot(g1.timeOfWeek-x1.tVec(1), g1ECEF(:,i)-pE(i))
+        plot(g2.timeOfWeek-x1.tVec(1), g2ECEF(:,i)-pE(i))
+    end
+    legend("rec1", "rec2", "gps1", "gps2")
+    xlabel("Time since startup [s], mean: "...
             +"x_1:"+num2str(round(mean(x1.xVec(:,i)-pE(i)),1))+", " ...
             +"x_2:"+num2str(round(mean(x2.xVec(:,i)-pE(i)),1))+", " ...
             +"g_1:"+num2str(round(mean(g1ECEF(:,i)-pE(i)),1))+", " ...
-            +"g_2:"+num2str(round(mean(g2ECEF(:,i)-pE(i)),1));
-        if isGPS
-            plot(g1.ToWms/1000-x1.tVec(1), g1ECEF(:,i)-pE(i))
-            plot(g2.ToWms/1000-x1.tVec(1), g2ECEF(:,i)-pE(i))
-        else
-            plot(g1.timeOfWeek-x1.tVec(1), g1ECEF(:,i)-pE(i))
-            plot(g2.timeOfWeek-x1.tVec(1), g2ECEF(:,i)-pE(i))
-        end
-    end
-    legend(legendStr2)
-    xlabel(xlabelStr);
+            +"g_2:"+num2str(round(mean(g2ECEF(:,i)-pE(i)),1)));
     ylabel(dirECEF(i))
 end
 
@@ -138,29 +126,29 @@ distObsNorm(x2, allsat, "est", "rec1")
 distObsNorm(x1, allsat, "est", "rec2")
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %Figure 5
-% if any(strcmp(g1.Properties.VariableNames,"ToWms"))
-%     [t1idx, t2idx]=findT0toEnd(g1.ToWms,g2.ToWms);
-% else
-%     [t1idx, t2idx]=findT0toEnd(g1.timeOfWeek,g2.timeOfWeek);
-% end
-% [g1_inter, g2_inter]=interpolGPS(g1,g2, t1idx, t2idx);
-% [x, y, z]=ecef2ned(g1_inter(:,1), g1_inter(:,2), g1_inter(:,3), pL(1), pL(2), pL(3), spheroid);
-% g1_inter=[x, y, z];
-% [x, y, z]=ecef2ned(g2_inter(:,1), g2_inter(:,2), g2_inter(:,3), pL(1), pL(2), pL(3), spheroid);
-% g2_inter=[x, y, z];
-% diffPos=g2_inter-g1_inter;
-% figure
-% for i=1:3
-%    hold on
-%    histogram(diffPos(:,i),'Normalization','probability', 'DisplayStyle', 'stairs')
-% end
-% legend("N", "E", "D")
-% mu1=string(round(mean(diffPos), 1));
-% sigma2=string(round(var(diffPos), 1));
-% xlabel("N, E, D direction mean: "+mu1(1)+", "+mu1(2)+", "+mu1(3)+" [m]"+...
-%        ", variance: "+sigma2(1)+", "+sigma2(2)+", "+sigma2(3))
-% sgtitle("Histogram over distances between receivers from internal solution in NED [m]")
+%Figure 5
+if any(strcmp(g1.Properties.VariableNames,"ToWms"))
+    [t1idx, t2idx]=findT0toEnd(g1.ToWms,g2.ToWms);
+else
+    [t1idx, t2idx]=findT0toEnd(g1.timeOfWeek,g2.timeOfWeek);
+end
+[g1_inter, g2_inter]=interpolGPS(g1,g2, t1idx, t2idx);
+[x, y, z]=ecef2ned(g1_inter(:,1), g1_inter(:,2), g1_inter(:,3), pL(1), pL(2), pL(3), spheroid);
+g1_inter=[x, y, z];
+[x, y, z]=ecef2ned(g2_inter(:,1), g2_inter(:,2), g2_inter(:,3), pL(1), pL(2), pL(3), spheroid);
+g2_inter=[x, y, z];
+diffPos=g2_inter-g1_inter;
+figure
+for i=1:3
+   hold on
+   histogram(diffPos(:,i),'Normalization','probability', 'DisplayStyle', 'stairs')
+end
+legend("N", "E", "D")
+mu1=string(round(mean(diffPos), 1));
+sigma2=string(round(var(diffPos), 1));
+xlabel("N, E, D direction mean: "+mu1(1)+", "+mu1(2)+", "+mu1(3)+" [m]"+...
+       ", variance: "+sigma2(1)+", "+sigma2(2)+", "+sigma2(3))
+sgtitle("Histogram over distances between receivers from internal solution in NED [m]")
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Figure 6

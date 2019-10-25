@@ -48,14 +48,14 @@ addpath('rSatRawData/')
 addpath('Simulations/')
 path="Logs/Uggleviken";
 date="0411/";
-dir="E";
+dir="N";
 sets.path=path+date+dir;
 trueD=10;
 [eph1, eph2] = rEphData(path+date+dir);
 [raw1, raw2] = rRawData(path+date+dir);
-addpath('SatsMove/')
-addpath('../data');
-addpath("../Logs");
+%addpath('SatsMove/')
+%addpath('../data');
+%addpath("../Logs");
 [gps1, gps2, p1, p2]=loadGPSLog(path+date+dir);
 
 %% Create the starting position and satellite positions 
@@ -108,10 +108,8 @@ plotResultDD(r_ab,tVec, DD, dir, refSat, sets)
 % Estimate global position
 % compute the position based on the observation and ephmeris data 
 % x=estGlobalPos([raw data], [ephemeris data], [step size](default=5), [t_end] (default=all))
-%eph2 2 6 12 14 25 32
-%eph1 2 6 12 14 25 32
-%eph1=eph1([5 6 7 11 12]);
-%eph2=eph2([5 6 7 11 12]);
+%eph1=eph1([1 2 3 4 7 10]);
+%eph2=eph2([1 2 3 4 8 11])
 x1=estGlobalPos(raw1,eph1, sets, p1);
 x2=estGlobalPos(raw2,eph2, sets, p2);
 
@@ -125,3 +123,6 @@ sgtitle(fig3, {"Difference obs-||p_{sat}-p_{true}|| per satellite over time",...
                "obs adjusted for sv and receiver bias"})
 sgtitle(fig4, {"Difference obs-||p_{sat}-p_{est}|| per satellite over time", ...
                "obs adjusted for sv and receiver bias"})         
+           
+%% Testing that satellite trajectories are correct
+satsMovement(x1, sets.posECEF, eph1(1).week, eph1)           

@@ -29,4 +29,4 @@ x2N_0706=estGlobalPos(raw2N_0706, ephN_0706);
 posRec=[gpsData0706.lla_0_(1) gpsData0706.lla_1_(1), gpsData0706.lla_2_(1)];
 posRecECEF=[gpsData0706.ecef_0_(1) gpsData0706.ecef_1_(1), gpsData0706.ecef_2_(1)];
 %Välj vilken logg som skall användas
-satsMovement(x1E, posRec, posRecECEF)
+satsMovement(x1E, posRec, posRecECEF, eph1E(1).week)
