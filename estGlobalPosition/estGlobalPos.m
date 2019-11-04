@@ -1,4 +1,25 @@
 function out=estGlobalPos(raw, eph, sets, posRec)
+%IN 
+% raw, struct[]:        observation data struct
+% eph, struct[]:        ephemeris data struct
+% sets, struct[]:       settings
+% posRec, double[3]:    receiver true position (optional)
+%OUT
+% out, struct[]:,               calculations struct with the fields:
+%       bVec, double[]:         receiver clock bias [m]
+%       xVec, double[][3]:      receiver position in ECEF
+%       Hvec, cell[]:           satellite geometric distribution matrix
+%       llaVec, double[][3]:    receiver position in lla-coordinates
+%       tVec, double[]:         registered receiver time [GPST]
+%       satID, int[]:           satellites available from ephemeris data
+%       satPos, struct[]:       satellite positions with fields
+%               pos, double[][4]: [time of week, (satellites position in ECEF)]
+%               elAz, double[][4]:[time of week, elevation, azimuth, distance]
+%       obsVec, struct[]: Observation data with fields:
+%               obs, cell[]:    [time of week, raw pseudorange values]
+%               obsAdj, cell[]: [time of week, pseudorange adjusted wrt c*dt]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DESCRIPTION
 % Estimate global position from the raw data available in obsd_t and eph_t 
 % calculations based on those presented in 
 % http://www.telesens.co/2017/07/17/calculating-position-from-raw-gps-data/
@@ -15,25 +36,7 @@ function out=estGlobalPos(raw, eph, sets, posRec)
 %       c is the speed of light
 %   2. Calculate satellite position for given time
 %   3. Calculate least square solution 
-%IN 
-% raw, struct[]:        observation data struct containing 
-%   numsats, int[]:     # observed satellites    
-%   ToW, double:        time of observation in unix seconds
-%   data, double[][5]:  Matrix with columns sat, SNR, LLI, code, P (pseudorange)
-%OUT
-% out, struct[]:,               calculations struct with the fields:
-%       bVec, double[]:         receiver clock bias [m]
-%       xVec, double[][3]:      receiver position in ECEF
-%       Hvec, cell[]:           satellite geometric distribution matrix
-%       llaVec, double[][3]:    receiver position in lla-coordinates
-%       tVec, double[]:         registered receiver time [GPST]
-%       satID, int[]:           satellites available from ephemeris data
-%       satPos, struct[]:       satellite positions with fields
-%               pos, double[][4]: [time of week, (satellites position in ECEF)]
-%               elAz, double[][4]:[time of week, elevation, azimuth, distance]
-%       obsVec, struct[]: Observation data with fields:
-%               obs, cell[]:    [time of week, raw pseudorange values]
-%               obsAdj, cell[]: [time of week, pseudorange adjusted wrt c*dt]
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Input argument cases
@@ -89,7 +92,7 @@ for i=1:h:t_end
     SNR             = raw_t(iR,I("SNR"));
     eph_t           = eph(iE);
     [eph_t, obs, SNR]    = satElevMask(eph_t,obs, SNR, t, posRec, elMask); %Remove sats below elevMask
-    if length(obs)<=4 %Minimum 4 sats used to calculate position and clock bias
+    if length(obs)<4 %Minimum 4 sats used to calculate position and clock bias
         continue
     end
     

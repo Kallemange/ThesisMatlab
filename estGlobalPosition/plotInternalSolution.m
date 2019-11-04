@@ -16,13 +16,19 @@ function plotInternalSolution(x1, x2, dist, dir, saveToFile)
 
 wgs84 = wgs84Ellipsoid;
 %Transform the position to NED-coordinates wrt the first position of rec1
-[x y z]=ecef2ned(x1.ecef_0_, x1.ecef_1_, x1.ecef_2_,x1.lla_0_(1), x1.lla_1_(1), x1.lla_2_(1), wgs84);
-rec1.pos=[x y z];
-rec1.t=x1.ToWms;
-[x y z]=ecef2ned(x2.ecef_0_, x2.ecef_1_, x2.ecef_2_,x1.lla_0_(1), x1.lla_1_(1), x1.lla_2_(1), wgs84);
-rec2.pos=[x y z];
-rec2.t=x2.ToWms;
-
+if any(strcmp('ecef_0_', x1.Properties.VariableNames))
+    [x, y, z]=ecef2ned(x1.ecef_0_, x1.ecef_1_, x1.ecef_2_,x1.lla_0_(1), x1.lla_1_(1), x1.lla_2_(1), wgs84);
+    rec1.pos=[x y z];
+    rec1.t=x1.ToWms;
+    [x, y, z]=ecef2ned(x2.ecef_0_, x2.ecef_1_, x2.ecef_2_,x1.lla_0_(1), x1.lla_1_(1), x1.lla_2_(1), wgs84);
+    rec2.pos=[x y z];
+    rec2.t=x2.ToWms;
+elseif any(strcmp(x1.Properties.VariableNames, 'ned0'))
+    rec1.pos=[x1.ned0 x1.ned1, x1.ned2];
+    rec1.t=x1.timeOfWeek;
+    rec2.pos=[x2.ned0 x2.ned1, x2.ned2];
+    rec2.t=x2.timeOfWeek;
+end
 %p0=rec1.pos(1,:);
 labelVec = ['N-direction'; 'E-direction'; 'D-direction'];
 numVec   = ['0', '1', '2'];
@@ -82,7 +88,7 @@ function [rNED]=interpol(x1,x2)
 if x1.t(1)<=x2.t(1)
     t0=x2.t(1);
 else
-    t0=x1.ToWms(1);
+    t0=x1.t(1);
 end
 %Find last valid measurement for both reveicers
 if x1.t(end)<=x2.t(end)

@@ -40,7 +40,7 @@ function test_estimate_position(in, convergence, pres, saveToFile, format)
 
 %Number of steps in iteration for final estimat and convergence order
 if nargin<4
-    saveToFile=1;
+    saveToFile=0;
     format='epsc';
 end
 if nargin<3

@@ -1,5 +1,4 @@
 	function [x, b, norm_dp, G, xVec, bVec] = estimate_position(xs, pr, numSat, x0, b0, dim, pres, W)
-	% estimate_position: estimate the user's position and user clock bias
 	% Usage: [x, b, norm_dp, G] = estimate_position(xs, pr, numSat, x0, b0, dim)
 	% Input Args: xs: satellite position matrix
 	%             pr: corrected pseudo ranges (adjusted for known value of the
@@ -18,6 +17,7 @@
 	%              G: user satellite geometry matrix, useful for computing DOPs
     %              xVec: receiver position estimate at each iteration
     %              bVec: clock bias estimate at each iteration
+    % estimate_position: estimate the user's position and user clock bias
     if nargin<8
         W=1;
     end

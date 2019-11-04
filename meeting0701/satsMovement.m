@@ -3,7 +3,7 @@ function satsMovement(x, posRecECEF, week, eph)
 
 
 %Transformera positionerna i ECEF till positioner i NED till elev-azim
-close all
+figure
 ax=polaraxes;
 ax.ThetaDir='clockwise';
 ax.ThetaZeroLocation='top';
@@ -42,37 +42,37 @@ sgtitle({strcat("satellites movement over the sky, starting at: ",t0title),...
     strcat("ending at: ", tendtitle)})
 hold off
 %[satIDVec' azVec' elVec']
-figure(2)
+fig2=figure;
 sgtitle({strcat("satellites movement over the sky, starting at: ",t0title),...
     strcat("ending at: ", tendtitle)})
-figure(3)
+fig3=figure;
 sgtitle({strcat("satellites movement over the sky, starting at: ",t0title),...
     strcat("ending at: ", tendtitle)})
 legend2=[];
 for i=1:length(x.satPos.elAz)
      xs=x.satPos.elAz{i};
-     figure(2)
+     figure(fig2);
      if(~isempty(xs))
         plot((xs(:,1)-xs(1))/60, xs(:,3))              % plot the data,
         hold on;
-        figure(3)
+        figure(fig3);
         plot((xs(:,1)-xs(1))/60, xs(:,2))
         hold on
         legend2(end+1)=x.satID(i);
     end
 end
-figure(2)
+figure(fig2);
 ylabel('elevation[deg]')
 xlabel('time[min]')
 legend(string(num2str(legend2')), 'AutoUpdate','off')
 noLines=(x.tVec(end)-x.tVec(1))/600;
 lineAtEach10min(t0, noLines, [0 90])
-figure(3)
+figure(fig3);
 ylabel('azimuth[deg] from north')
 xlabel('time[min]')
 legend(string(num2str(legend2')), 'AutoUpdate','off')
 lineAtEach10min(t0, noLines, [0 360])
-figure(4)
+fig4=figure;
 sgtitle({strcat("satellites movement over the sky, starting at: ",t0title),...
     strcat("ending at: ", tendtitle)})
 hold on
@@ -98,7 +98,7 @@ legend(string(num2str(legend2')), 'AutoUpdate','off');
 ylabel('Distance [m]')
 hold off
 
-figure(5)
+fig5=figure;
 hold on
 L=6*3600;
 t=x.tVec(1):x.tVec(1)+L;

@@ -125,4 +125,5 @@ sgtitle(fig4, {"Difference obs-||p_{sat}-p_{est}|| per satellite over time", ...
                "obs adjusted for sv and receiver bias"})         
            
 %% Testing that satellite trajectories are correct
+addpath('meeting0701\')
 satsMovement(x1, sets.posECEF, eph1(1).week, eph1)           
