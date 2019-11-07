@@ -39,7 +39,6 @@ while ischar(tline)
     end
     catch ME
         fclose(fid);
-        keyboard
         emptyIndex = find(arrayfun(@(eph) isempty(eph.sat),eph));
         eph(emptyIndex)=[];
         return;

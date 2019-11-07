@@ -47,8 +47,11 @@ addpath('Simulations/GlobalPosEstimate')
 addpath('rSatRawData/')
 addpath('Simulations/')
 path="Logs/Uggleviken";
-date="0411/";
+%path="Logs/1106_113428";
+date="1106/";
 dir="N";
+%date="0411/";
+%dir="N";
 sets.path=path+date+dir;
 trueD=10;
 [eph1, eph2] = rEphData(path+date+dir);
@@ -58,23 +61,6 @@ trueD=10;
 %addpath("../Logs");
 [gps1, gps2, p1, p2]=loadGPSLog(path+date+dir);
 
-%% Create the starting position and satellite positions 
-%Positions of satellites and receivers
-in.pRec=p1;
-eph=eph1;
-pSat=satPositions(eph, 0);
-[~,elev]=ecef2elaz(pSat,in.pRec);
-in.pSat=pSat(elev>sets.optSol.elMask,:);
-in.eph=eph(elev>sets.optSol.elMask);
-in.pSat=pSat(1:4,:);
-in.eph=eph(1:4);
-clearvars elev pSat eph;
-%Error terms to be included in the simulations
-in.eps.satPos=0; in.eps.recPos=0; in.eps.clockB=0; in.eps.gauss=0; in.eps.timeErr=0;
-%% Testing the output of the simulations for different levels of input noise
-%Global positions
-run_test_estimate_position(in)
-
 
 %% Part 2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,6 +68,32 @@ run_test_estimate_position(in)
 %This plots the histogram of positions with rec1 as reference position p_0, 
 %as well as the histogram of relative position between receivers.
 plotInternalSolution(gps1,gps2, trueD, dir, false);
+%% Part 5 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Estimate global position
+% compute the position based on the observation and ephmeris data 
+% x=estGlobalPos([raw data], [ephemeris data], [step size](default=5), [t_end] (default=all))
+%For E-direction, use only these:
+%eph1=eph1([1 3 4 5 6 9 11]);
+%eph2=eph2([1 3 4 5 6 9 10]);
+%For N-direction, use only these:
+% eph1=eph1([1 3 5 6 7 8 9 13 14]);
+% eph2=eph2([1 3 5 6 7 8 9 13 14]);
+
+x1=estGlobalPos(raw1,eph1, sets, p1);
+x2=estGlobalPos(raw2,eph2, sets, p2);
+
+%% Plot estimates
+[fig1, fig2, fig3, fig4]=plot_global_estimate(x1, x2, gps1, gps2, sets, [eph1.sat], [eph2.sat]);
+sgtitle(fig1, {"Position difference in NED-coordinates, dist_{true}=10m "+dir+"-dir", ...
+               "x_0:= first reading of receiver 1"})
+sgtitle(fig2, {"Position difference in ECEF-coordinates, dist_{true}=10m "+dir+"-dir", ...
+               "x_0:= first reading of receiver 1"})
+sgtitle(fig3, {"Difference obs-||p_{sat}-p_{true}|| per satellite over time",...
+               "obs adjusted for sv and receiver bias"})
+sgtitle(fig4, {"Difference obs-||p_{sat}-p_{est}|| per satellite over time", ...
+               "obs adjusted for sv and receiver bias"})
+           
 
 %% Part 4 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -100,30 +112,28 @@ D                   = calcDiffPr(raw1,raw2,t1raw, sets);
 %IN pseudorange distance, directions to satellites
 %OUT time since start, distance in xyz, clock-drift over time
 addpath optimalSolPr\;
-[tVec, r_ab, DD, refSat]         = optimalSolPr(D,eph1, sets); 
+[tVec, r_ab, DD, refSat, DOP]         = optimalSolPr(D,eph1, sets, p1); 
 %Plot results from calculations performed above
-plotResultDD(r_ab,tVec, DD, dir, refSat, sets)
-%% Part 5 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Estimate global position
-% compute the position based on the observation and ephmeris data 
-% x=estGlobalPos([raw data], [ephemeris data], [step size](default=5), [t_end] (default=all))
-%eph1=eph1([1 2 3 4 7 10]);
-%eph2=eph2([1 2 3 4 8 11])
-x1=estGlobalPos(raw1,eph1, sets, p1);
-x2=estGlobalPos(raw2,eph2, sets, p2);
+plotResultDD(r_ab,tVec, DD, dir, refSat, sets, DOP)
 
-%% Plot estimates
-[fig1, fig2, fig3, fig4]=plot_global_estimate(x1, x2, gps1, gps2, sets, [eph1.sat], [eph2.sat]);
-sgtitle(fig1, {"Position difference in NED-coordinates, dist_{true}=10m "+dir+"-dir", ...
-               "x_0:= first reading of receiver 1"})
-sgtitle(fig2, {"Position difference in ECEF-coordinates, dist_{true}=10m "+dir+"-dir", ...
-               "x_0:= first reading of receiver 1"})
-sgtitle(fig3, {"Difference obs-||p_{sat}-p_{true}|| per satellite over time",...
-               "obs adjusted for sv and receiver bias"})
-sgtitle(fig4, {"Difference obs-||p_{sat}-p_{est}|| per satellite over time", ...
-               "obs adjusted for sv and receiver bias"})         
-           
+     
 %% Testing that satellite trajectories are correct
 addpath('meeting0701\')
-satsMovement(x1, sets.posECEF, eph1(1).week, eph1)           
+satsMovement(x1, sets.posECEF, eph1(1).week, eph1)
+%% Create the starting position and satellite positions 
+%Positions of satellites and receivers
+in.pRec=p1;
+eph=eph1;
+pSat=satPositions(eph, 0);
+[~,elev]=ecef2elaz(pSat,in.pRec);
+in.pSat=pSat(elev>sets.optSol.elMask,:);
+in.eph=eph(elev>sets.optSol.elMask);
+in.pSat=pSat(1:4,:);
+in.eph=eph(1:4);
+clearvars elev pSat eph;
+%Error terms to be included in the simulations
+in.eps.satPos=0; in.eps.recPos=0; in.eps.clockB=0; in.eps.gauss=0; in.eps.timeErr=0;
+%% Testing the output of the simulations for different levels of input noise
+%Global positions
+run_test_estimate_position(in)
+

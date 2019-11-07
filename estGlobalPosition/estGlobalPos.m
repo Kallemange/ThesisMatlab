@@ -156,7 +156,7 @@ for i=1:h:t_end
     out.tVec(end+1)     = t;
     out.bVec            = [out.bVec b];
     out.llaVec          = [out.llaVec; ecef2lla(xu, 'WGS84')];
-    out.Hvec{end+1}     = calcH(posRec, Xs); %Calculate the DOP-matrix values
+    out.Hvec{end+1}     = calcH(posRec, Xs,ecef2lla(xu, 'WGS84')); %Calculate the DOP-matrix values
     out.visSV(end+1,:)  = [t length(pr)];
 end
     out.satPos          = allSatPos;

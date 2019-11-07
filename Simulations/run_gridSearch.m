@@ -3,14 +3,15 @@
 %Run a grid search over the nominal time of the observation to see what
 %time which best fits the observations by minimizing |y-y_hat| for all
 %observations. 
+addpath('Simulations/gridSearch/')
 c           = 299792458;  
 %%
-raw=raw1;
-eph=eph1;
-x=x1;
+raw=raw;
+eph=eph;
+x=x;
 eph=eph([eph.sat]<33);
-g=gps1;
-Id=17500;
+g=gps;
+Id=5000;
 
 p_true=lla2ecef([g.lla0(1), g.lla1(1), g.lla2(1)]);
 [p, b]=plotGridSearchAtT(raw(Id), eph, p_true);

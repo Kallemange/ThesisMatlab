@@ -59,7 +59,6 @@ for i=1:length(D)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Find reference satellite for the epoch
-    %sat_idx=find(D_i.sat==9);
     sat_idx=find(D_i.SNR==max(D_i.SNR), 1, 'first');
     refSat=D_i.sat(sat_idx);
     refSatVec(end+1,:)=[D_i.ToW,refSat];
@@ -87,20 +86,23 @@ for i=1:length(D)
         %Weighted least squares solution to double difference problem
         dP                  = (dU'*W*dU)\(dU'*W*DD);
         r_ab(:,i)           = dP;
-        DOP{end+1}          = calcDOP(dU, p1LLA);               
+        DOP{end+1}          = calcDOP(Xs, p1, p1LLA, ellipsoid);               
     end
     tVec(i)=D_i.ToW;
 end
 [DDVec, tVec, r_ab]=removeEmptyEpochs(DDVec, tVec, r_ab);
 end
 
-function H=calcDOP(u, lla0)
+function H=calcDOP(xs, x0, lla0, ellipsoid)
 %Geometric distribution of the satellites to calculate the DOP-values
-[uNorth,vEast,wDown] = ecef2nedv(u(:,1), u(:,2), u(:,3),lla0(1),lla0(2));
-G = [uNorth vEast, wDown];
 
+[N,E,D]=ecef2ned(xs(:,1),xs(:,2),xs(:,3),lla0(1), lla0(2), lla0(3), ellipsoid);
+norms = sqrt(sum((xs-x0).^2,2));
+% delta pseudo range:
+G = [-[N E D]./norms];
+G_ = [G ones(size(G, 1),1)];
 
-H = inv(G'*G);
+H = inv(G_'*G_);
 end
 
 function [elAz, DD, SNR, dU, DD_sats]=remove_low_sats(D, u, az, el, idx, elMask)

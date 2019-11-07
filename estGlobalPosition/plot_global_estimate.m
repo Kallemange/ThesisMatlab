@@ -73,7 +73,9 @@ for i=1:3
     leg1=["rec1", "rec2"];
     xlabelStr1="Time since startup [s], mean: "...
             +"x_1:"+num2str(round(mean(x1NED(:,i)),1))+", " ...
-            +"x_2:"+num2str(round(mean(x2NED(:,i)),1))+", ";
+            +"x_2:"+num2str(round(mean(x2NED(:,i)),1))+", " ...
+            +"\sigma_1:"+num2str(round(sqrt(var(x1NED(:,i))),1))+", "...
+            +"\sigma_2:"+num2str(round(sqrt(var(x2NED(:,i))),1));
     if sets.plots.global.plotGPS
         leg1=["rec1", "rec2","gps1", "gps2"];            
         if isGPS
@@ -328,5 +330,6 @@ function fig=plotDOP(x, fig, idx)
     plot(x.tVec, HDOP, x.tVec,VDOP, x.tVec,TDOP,x.tVec,GDOP)
     leg=legend("HDOP", "VDOP", "TDOP", "GDOP");
     leg.Title.String="rec"+num2str(idx);
-    xlabel("Time since startup")
+    xlabel("Time since startup, mean HDOP: "+num2str(round(mean(HDOP),2))+", VDOP:"+...
+                                        num2str(round(mean(VDOP),2)))
 end
