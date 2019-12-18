@@ -40,7 +40,7 @@ function test_estimate_position(in, convergence, pres, saveToFile, format)
 
 %Number of steps in iteration for final estimat and convergence order
 if nargin<4
-    saveToFile=0;
+    saveToFile=1;
     format='epsc';
 end
 if nargin<3
@@ -52,7 +52,10 @@ end
 
 N=100; N_conv=7;
 c=299792458;
-label_y="estimate error magnitude";
+fontsize=12;
+fontsize2=14;
+%label_y="estimate error magnitude";
+label_y="$|\theta-\hat{\theta}|$";
 switch in.noise
     case 'clockB'
         noiseMag=c*linspace(0,10e-3, N);
@@ -91,7 +94,7 @@ switch in.noise
         label_x="Time shift [s]";
         figname='clockErr';
     case 'mixedNoise'
-        noiseVec=10.^[-10:4];
+        noiseVec=10.^[-10:2:4];
         noise_convergence=10.^(-10:2:5);
         plotTitle="Error in position and clock bias with noise present in both parameters";
         plotTitle_convergence=[{"Error in position and clock bias estimate with noise present"} ...
@@ -101,9 +104,10 @@ switch in.noise
     otherwise
         plotTitle="Positional estimate error using noise free data"; 
         plotTitle_convergence="Convergence of estimate using a noise free measurement";
-        label_x="";
+        label_x="${\bf p}_0$ error magnitude";
         N=10e2;
         noiseVec=zeros(1,N);
+        positionNoise=linspace(1, 1e5, length(noiseVec));
         noise_convergence=zeros(1,N_conv);
         figname='noiseFree';
 end
@@ -112,6 +116,7 @@ end
 if (nargin<2||~strcmp(convergence, 'convergence'))
     %initial position
     x0=[0 0 0];
+    b0=0;
     %Positional error, function error, mean square error
     deltaPVec=[];      deltaYVec=[];   mseVec=[];
     %clock bias estimate
@@ -119,13 +124,16 @@ if (nargin<2||~strcmp(convergence, 'convergence'))
 
     for i=1:length(noiseVec)
         in.eps.(in.noise)=noiseVec(i);
-        [pr Xsat]=simulate_observation(in);
+        [pr, Xsat]=simulate_observation(in);
         if strcmp(in.noise, 'clockErr')
             in.pSat=satPositions(in.eph, in.eps.(in.noise));
+        elseif strcmp(in.noise, 'noiseless')
+            x0=in.pRec-randn(1,3)*positionNoise(i);
+            %b0=b0-randn(1)*positionNoise(i);
         end
         %Estimate position using receiver observations and calculated positions of
         %the satellites
-        [p_est, bVec(end+1)]=estimate_position(Xsat, pr, length(pr), x0,0, 3);
+        [p_est, bVec(end+1)]=estimate_position(Xsat, pr, length(pr), x0,b0, 3);
         deltaPVec(end+1)=norm(p_est-in.pRec);
         deltaYVec(end+1)=norm([p_est-in.pRec bVec(end)-in.eps.clockB]);
         %Calculate the expected value of the measurement with given
@@ -146,20 +154,24 @@ if (nargin<2||~strcmp(convergence, 'convergence'))
             plot(noiseVec(2:end),deltaPVec(2:end))
             plot(noiseVec(2:end),deltaYVec(2:end))
             plot(noiseVec(2:end),mseVec(2:end))
+            %plot(noiseVec,deltaPVec./noiseVec)
         end
         legend("$|\textbf{p}-\hat{\textbf{p}}|$",...
                "$|\theta-\hat{\theta}|$", ...
-               "$\frac{1}{n}\Sigma_{i=1}^n (y^{(i)}-\hat{y}^{(i)})^2$",...
+               "$|{\bf y -\hat{y}}|^2/n$",...
                'Interpreter', 'latex');
+                %"$\frac{1}{n}\Sigma_{i=1}^n (y^{(i)}-\hat{y}^{(i)})^2$",...
         %semilogy(noiseVec,deltaPVec)
     else
-        plot(1:N,deltaPVec)
+        plot(positionNoise,deltaPVec)
+        subplot(212)
+        plot(positionNoise, bVec)
+        subplot(211)
         %semilogy(1:N,deltaPVec)
-        axis([0 N -10e-9, 10e-9])
     end
-    title(plotTitle)
-    xlabel(label_x)
-    ylabel(label_y)
+    %title(plotTitle)
+    xlabel(label_x,'Interpreter', 'latex', 'fontsize',fontsize2)
+    ylabel(label_y,'Interpreter', 'latex', 'fontSize', fontsize2)
     set(gca,'YScale','log')
     subplot(2,1,2)
     if strcmp(in.noise, 'clockB')
@@ -167,13 +179,15 @@ if (nargin<2||~strcmp(convergence, 'convergence'))
         hold on
         plot(noiseMag, noiseVec*1000/c, 'k')
         leg=legend("$\Delta \hat{t}$", "$\Delta t$", 'Interpreter', 'latex');
-        title(leg,"Clock bias")
+        %title(leg,"Clock bias")
+    elseif strcmp(in.noise, 'noiseless')
+        plot(positionNoise, bVec*1000/c)
     else
         plot(noiseVec, bVec*1000/c)
     end
     %semilogy(noiseVec, bVec*1000/c)
-    ylabel("Estimated clock bias [ms]")
-    xlabel("noise magnitude")
+    ylabel("$\Delta \hat{t}_{rec}$ [ms]", 'Interpreter', 'latex','fontSize', fontsize2)
+    xlabel("noise magnitude", 'fontSize', fontsize2)
     %set(gca,'YScale','log')
     if saveToFile
         if ~isdir("Figures")
@@ -222,57 +236,61 @@ elseif strcmp(convergence, 'convergence')
             plot(posError')
         end
     end
-    sgtitle(plotTitle_convergence);
+    %sgtitle(plotTitle_convergence);
     if strcmp(in.noise, 'clockB' )
         subplot(211)
         set(gca,'YScale','log')
         xlabel("#iteration")
-        ylabel('$|\textbf{p}-\hat{\textbf{p}}|$', 'Interpreter', 'latex');
-        leg=legend(strsplit(string(num2str(10.^[1:N_conv], "%10.0e"))));
-        title(leg,"starting position")
+        ylabel('$|\textbf{p}-\hat{\textbf{p}}|$', 'Interpreter', 'latex', 'fontSize', fontsize);
+        %leg=legend(strsplit(string(num2str(10.^[1:N_conv], "%10.0e"))));
+        leg=legend(num2str(noise_convergence', "%10.0e"));
+        %title(leg,"starting position")num2str(noise_convergence'
         subplot(212)
         hold on
         set(gca,'YScale','log')
         xlabel("#iteration")
-        ylabel('$|\Delta t-\Delta\hat{t}|$', 'Interpreter', 'latex');
+        ylabel('$|\Delta t-\Delta\hat{t}|$', 'Interpreter', 'latex', 'fontSize', fontsize);
     elseif strcmp(in.noise, 'recPos')
         subplot(211)
         set(gca,'YScale','log')
         xlabel("#iteration")
-        ylabel('$|\textbf{p}-\hat{\textbf{p}}|$', 'Interpreter', 'latex');
+        ylabel('$|\textbf{p}-\hat{\textbf{p}}|$', 'Interpreter', 'latex', 'fontSize', fontsize);
         leg=legend(strsplit(string(num2str(10.^[1:N_conv], "%10.0e"))));
-        title(leg,"noise magnitude")
+        %title(leg,"noise magnitude")
         subplot(212)
         hold on
         set(gca,'YScale','log')
         xlabel("#iteration")
-        ylabel('$|\Delta t-\Delta\hat{t}|$', 'Interpreter', 'latex');
+        ylabel('$|\Delta t-\Delta\hat{t}|$', 'Interpreter', 'latex','fontSize', fontsize);
     elseif strcmp(in.noise, 'mixedNoise')
         subplot(211)
         set(gca, 'YScale', 'log')
         xlabel('#iteration')
-        ylabel('$|\theta-\hat{\theta}|$', 'Interpreter', 'latex');
+        ylabel('$|\theta-\hat{\theta}|$', 'Interpreter', 'latex', 'fontSize', fontsize);
         leg=legend(strsplit(string(num2str(noiseVec, "%10.0e"))));
-        title(leg,"noise magnitude")
+        %title(leg,"noise magnitude")
         subplot(212)
         set(gca, 'YScale', 'log')
         hold on
         xlabel("#iteration")
-        ylabel("$\frac{1}{n}\Sigma_{i=1}^n (y^{(i)}-\hat{y}^{(i)})^2$",...
-               'Interpreter', 'latex');
+        %ylabel("$\frac{1}{n}\Sigma_{i=1}^n (y^{(i)}-\hat{y}^{(i)})^2$",...
+        %       'Interpreter', 'latex', 'fontSize', fontsize);
+        ylabel("$|{\bf y}-\hat{\bf y}|^2/n$", 'Interpreter', 'latex', 'fontSize', fontsize);
     else
         set(gca,'YScale','log')
         xlabel("#iteration")
-        ylabel(label_y)
+        ylabel(label_y, 'Interpreter', 'latex', 'fontSize', fontsize2)
     end
     %If noiseless estimates, see if position converges for a given starting
     %position
     if strcmp(in.noise, 'noiseless')
         leg=legend(strsplit(string(num2str(10.^[1:N_conv], "%10.0e"))));
-        title(leg,"starting position")
+        %title(leg,"starting position")
+    elseif strcmp(in.noise, 'mixedNoise')
+        leg=legend(strsplit(string(num2str(noiseVec, "%10.0e"))));
     else
         leg=legend(num2str(noise_convergence', "%10.1e"));
-        title(leg, "noise magnitude")
+        %title(leg, "noise magnitude")
     end
     if saveToFile
         saveas(fig, strcat('Figures/',figname, 'Conv'), format)

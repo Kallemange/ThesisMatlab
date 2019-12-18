@@ -54,28 +54,32 @@ for i=1:length(D)
     [D_i, eph_i]=selectObsFromEph(D(i), eph, iD, iE);
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    [D_i, eph_i]=removeLowSNR(D_i,eph_i, sets.optSol.SNR_threshold);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Get satellite position and unit vector to satellite
     [Xs, u]=get_all_sats_pos(eph_i, D_i.ToW, p1);
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Find reference satellite for the epoch
     %sat_idx=find(D_i.sat==9);
-    sat_idx=find(D_i.SNR==max(D_i.SNR), 1, 'first');
+    [az, el]                     = ecef2elaz(Xs,sets.posECEF);
+    %[~, sat_idx]=max(el);
+    %sat_idx=find(D_i.SNR==max(D_i.SNR), 1, 'first');
+    [~, sat_idx]=max(sum(D_i.SNR,2));
     refSat=D_i.sat(sat_idx);
     refSatVec(end+1,:)=[D_i.ToW,refSat];
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Create all the el-az values for the satellites, to reference with what
     %it should be in the readings as well as sorting out the low sats
-    [az, el]                     = ecef2elaz(Xs,sets.posECEF);
-    [elAz, DD, SNR, dU, DD_sats] = remove_low_sats(D_i, u, az, el, sat_idx, sets.optSol.elMask);
     
+    [elAz, DD, SNR, dU, DD_sats] = remove_low_sats(D_i, u, az, el, sat_idx, sets.optSol.elMask);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Populate DDVec with observations from current epoch
     DDVec=fillDDVec(DDVec, DD_sats, DD,dU, elAz, D_i.ToW);
     if length(DD)>=4
         %Create weighted matrix
         if(strcmp(sets.optSol.Weights,"SNR"))
-            W   = findWMatrix(SNR, "SNR", D_i.SNR(sat_idx));
+            W   = findWMatrix(SNR, "SNR");
         elseif (strcmp(sets.optSol.Weights,"elev"))
             W   = findWMatrix(elAz(:,1), "elev");           
         elseif (strcmp(sets.optSol.Weights, "elevSNR"))
@@ -94,6 +98,16 @@ end
 [DDVec, tVec, r_ab]=removeEmptyEpochs(DDVec, tVec, r_ab);
 end
 
+function [D_i, eph_i]=removeLowSNR(D,eph,threshold)
+D_i=D;
+eph_i=eph;
+noisyObs=any(D.SNR<threshold,2);
+D_i.dp(noisyObs)=[];
+D_i.sat(noisyObs)=[];
+D_i.SNR(noisyObs,:)=[];
+eph_i(noisyObs)=[];
+end
+
 function H=calcDOP(u, lla0)
 %Geometric distribution of the satellites to calculate the DOP-values
 [uNorth,vEast,wDown] = ecef2nedv(u(:,1), u(:,2), u(:,3),lla0(1),lla0(2));
@@ -110,7 +124,7 @@ function [elAz, DD, SNR, dU, DD_sats]=remove_low_sats(D, u, az, el, idx, elMask)
     lowSats                 = elAz(:,1)<elMask;
     DD                      = D.dp-D.dp(idx);
     SNR                     = D.SNR/4;
-    SNR(idx)                = [];
+    SNR(idx,:)                = [];
     %Remove that value corresponding to D_j from the solution (D_j-D_j:=0)
     DD(idx)                 = [];
     %Store all measurements in a cell-structure for later plotting
@@ -177,7 +191,7 @@ function [D_i, eph_i]=selectObsFromEph(D, eph, iD, iE)
     eph_i=eph(iE);
     D_i.dp=D.dp(iD);
     D_i.sat=D.sat(iD);
-    D_i.SNR=D.SNR(iD);
+    D_i.SNR=D.SNR(iD,:);
     [~, D_i.ToW]=UTC_in_sec2GPStime(D.ToW, week);
 end
 
@@ -189,7 +203,8 @@ function W=findWMatrix(value, type, refVal)
         case "SNR"
             %Create a matrix with the weights for all signals as per 
             %A GPS Pseudorange Based Cooperative Vehicular Distance Measurement Technique
-            W = diag((refVal^2)*value.^2./(refVal^2+value.^2));
+            %W = diag((refVal^2)*value.^2./(refVal^2+value.^2));
+            W=diag((value(:,1).^2.*value(:,2).^2)./(value(:,1).^2+value(:,2).^2));
         case "elev"
             %POSSIBLE WEIGHTING SCHEMES FOR GPS CARRIER PHASE OBSERVATION
             %1.001/[0.002001+SIN^2(ELEV)]^0.5

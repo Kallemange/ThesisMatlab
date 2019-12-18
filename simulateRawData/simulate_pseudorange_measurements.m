@@ -1,30 +1,31 @@
-function raw_simulated = simulate_pseudorange_measurements(receiver_pos, raw_obs, sat_eph_data, sat_idx, with_bias, clock_bias)
+function raw_simulated = simulate_pseudorange_measurements(sets,receiver_pos, raw_obs, sat_eph_data, sat_idx, with_bias, clock_bias, signal_bias)
 week=sat_eph_data(1).week;
 time=[raw_obs.ToW];
 if nargin <= 4
         fprintf('No clock or satellite bias added\n')
         with_bias = false;
         clock_bias = zeros(length(time));
+        signal_bias=zeros(size(sat_eph_data));
 end
+eps_magnitude=sets.noise.Gnoise;
 c = 299792458;              % Speed of light (m/s)
 omega_e = 7.2921151467e-5;  % Earth's rotation rate (rad/sec)
 raw_simulated   = raw_obs;
 
 for obs_itr = 1:length(time)
     [~, iR, iE]=intersect(raw_obs(obs_itr).data(:,1), sat_idx);
-    raw_t=raw_obs(obs_itr).data(iR,:);
     eph_t=sat_eph_data(iE);
     obs=raw_obs(obs_itr).data(iR, 5);
-    active_satellites = sat_idx(iE);
     rcvr_bias = clock_bias(obs_itr,1);
     [~, rcvr_tow] = UTC_in_sec2GPStime(raw_obs(obs_itr).ToW, week);
-        
+    bias_t=signal_bias(iE);
     for sat_itr = 1: length(obs)
         %sv_idx = active_satellites(sat_itr);
         %if ~isempty(find(active_satellites == sv_idx, 1))
             % Match observation with ephemeris data
         %eph_data=sat_eph_data(iE(sat_itr));
         eph_data=eph_t(sat_itr);
+        bias=bias_t(sat_itr);
         % Compute the pseudorange iteratively 
         distance0 = obs(sat_itr); delta_distance = 10;
         while delta_distance > 0.001
@@ -39,7 +40,7 @@ for obs_itr = 1:length(time)
             distance0 = distance;
         end
         if with_bias % Add the bias to the simulated measurements
-            raw_simulated(obs_itr).data(iR(sat_itr),5) = distance + rcvr_bias - c*dsv;
+            raw_simulated(obs_itr).data(iR(sat_itr),5) = distance + bias + rcvr_bias - c*dsv+eps_magnitude*randn;
         else
             raw_simulated(obs_itr).data(iR(sat_itr),5)= distance - c*dsv;
         end

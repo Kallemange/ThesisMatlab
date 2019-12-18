@@ -34,7 +34,7 @@ I =@(var) find(["sat", "SNR", "LLI", "code", "P"]==var);
 k=1;
 L=length(r2);
 for i=t1(1):t1(2)
-    raw1                   = r1(i);
+    raw1 = r1(i);
     while k<L-1
         if r2(k+1).ToW>raw1.ToW
             break
@@ -83,7 +83,7 @@ for i=t1(1):t1(2)
     [~, i1, i2]            = intersect(raw1.data(:,I("sat")), raw2.data(:,I("sat")));
     dPr(i).dp              = raw1.data(i1,I("P"))-raw2.data(i2,I("P"));
     dPr(i).sat             = raw1.data(i1,I("sat"));
-    dPr(i).SNR             = raw1.data(i1,I("SNR"));
+    dPr(i).SNR             = [raw1.data(i1,I("SNR")) raw2.data(i2,I("SNR"))];
     dPr(i).ToW             = raw1.ToW; 
 end
 dPr(idx_to_remove)=[];

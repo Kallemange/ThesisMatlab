@@ -41,25 +41,30 @@ calculations of satellite positions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load Data
 SimSettings;
+%%
 addpath('estGlobalPosition/')
 addpath('estGlobalPosition/SatsMove/')
 addpath('Simulations/GlobalPosEstimate')
+addpath('simulateRawData')
 addpath('rSatRawData/')
 addpath('Simulations/')
 path="Logs/Uggleviken";
 %path="Logs/1106_113428";
 date="1106/";
-dir="N";
+dir="E";
 %date="0411/";
 %dir="N";
 sets.path=path+date+dir;
 trueD=10;
 [eph1, eph2] = rEphData(path+date+dir);
+%eph1=eph1([eph1.sat]<33);
+%eph2=eph2([eph2.sat]<33);
 [raw1, raw2] = rRawData(path+date+dir);
 %addpath('SatsMove/')
 %addpath('../data');
 %addpath("../Logs");
 [gps1, gps2, p1, p2]=loadGPSLog(path+date+dir);
+p1LLA=ecef2lla(p1);
 
 
 %% Part 2
@@ -67,7 +72,7 @@ trueD=10;
 %New plots over relative position from internal solution
 %This plots the histogram of positions with rec1 as reference position p_0, 
 %as well as the histogram of relative position between receivers.
-plotInternalSolution(gps1,gps2, trueD, dir, false);
+plotInternalSolution(gps1,gps2, trueD, dir, true);
 %% Part 5 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Estimate global position
@@ -77,9 +82,10 @@ plotInternalSolution(gps1,gps2, trueD, dir, false);
 %eph1=eph1([1 3 4 5 6 9 11]);
 %eph2=eph2([1 3 4 5 6 9 10]);
 %For N-direction, use only these:
-% eph1=eph1([1 3 5 6 7 8 9 13 14]);
-% eph2=eph2([1 3 5 6 7 8 9 13 14]);
-
+%eph1=eph1([1 3 5 6 7 8 9 13 14]);
+%eph2=eph2([1 3 5 6 7 8 9 13 14]);
+%raw1=raw1(1:1000);
+%raw2=raw2(1:1000);
 x1=estGlobalPos(raw1,eph1, sets, p1);
 x2=estGlobalPos(raw2,eph2, sets, p2);
 
@@ -93,8 +99,6 @@ sgtitle(fig3, {"Difference obs-||p_{sat}-p_{true}|| per satellite over time",...
                "obs adjusted for sv and receiver bias"})
 sgtitle(fig4, {"Difference obs-||p_{sat}-p_{est}|| per satellite over time", ...
                "obs adjusted for sv and receiver bias"})
-           
-
 %% Part 4 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Compute relative position from observation data and own 
@@ -104,7 +108,9 @@ sgtitle(fig4, {"Difference obs-||p_{sat}-p_{est}|| per satellite over time", ...
 %IN satellite data[2], raw data[2]
 %OUT pseudo range distance between reciever ab, unit vector to satellites
 addpath estDFromPr\;
-[t1raw, ~, t0r]     = findFirstLast(raw1, raw2);
+%raw1=raw1(1:7000);
+%raw2=raw2(1:7000);
+[t1raw, t2raw, t0r]     = findFirstLast(raw1, raw2);
 D                   = calcDiffPr(raw1,raw2,t1raw, sets);
 
 % Estimate the relative position from the pr-measurements
@@ -113,10 +119,16 @@ D                   = calcDiffPr(raw1,raw2,t1raw, sets);
 %OUT time since start, distance in xyz, clock-drift over time
 addpath optimalSolPr\;
 [tVec, r_ab, DD, refSat, DOP]         = optimalSolPr(D,eph1, sets, p1); 
-%Plot results from calculations performed above
+%% Plot results from calculations performed above
 plotResultDD(r_ab,tVec, DD, dir, refSat, sets, DOP)
+%% Compare global and relative position
+baseline=10;
+[t1Vec, t2Vec]=matchRecTime(x1, x2);
+plotGlobalAndDD(x1,x2,t1Vec, t2Vec, tVec,r_ab, baseline, dir, "obs",0, p1LLA)
+%% Compare internal solution and relative position solution
+baseline=10;
+plotInternalAndDD(r_ab, tVec, gps1, gps2, dir);
 
-     
 %% Testing that satellite trajectories are correct
 addpath('meeting0701\')
 satsMovement(x1, sets.posECEF, eph1(1).week, eph1)

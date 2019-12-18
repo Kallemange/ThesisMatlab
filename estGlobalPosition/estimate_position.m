@@ -18,6 +18,8 @@
     %              xVec: receiver position estimate at each iteration
     %              bVec: clock bias estimate at each iteration
     % estimate_position: estimate the user's position and user clock bias
+    % Original code from which this has been adapted:
+    % http://www.telesens.co/2017/07/17/calculating-position-from-raw-gps-data/
     if nargin<8
         W=1;
     end

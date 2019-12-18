@@ -11,7 +11,7 @@ sets.sim.minElev=1;             %Minimal elev-value for observable satellites
 sets.sim.clockError=0.1;        %Clock error for receiver (to be mult by c)
 
 %Simulation noise levels
-sets.noise.Gnoise=0;            %Non-common Gaussian noise magnitude
+sets.noise.Gnoise=1;            %Non-common Gaussian noise magnitude
 sets.noise.sysNoiseMag=1000;    %Magnitude of sysNoise
 sets.noise.sysNoiseVec=0;       %Matrix to contain the values in noise.sysNoise
 sets.noise.sysNoise= @(M,N) sets.noise.sysNoiseMag*randn(M,N); %systematic noise
@@ -24,10 +24,11 @@ sets.optSol.Weights="SNR";      %Options: "SNR", "elev", "elevSNR" Weighted matr
 sets.optSol.elMask=15;          %elevation mask for satellites
 sets.optSol.OnlyGPS=0;          %Switch if only to use GPS-satellites or all (if 1, only ephemeris for svID<satIDMax will be used)
 sets.optSol.satIDMax=33;        %Maximum value of satID used (if OnlyGPS==1)
+sets.optSol.SNR_threshold=120;    %Minimum SNR-value to use for observations
 
 %Difference related calculations
 sets.diffPr.interpol=0;         %Interpolate readings between obs t- and t+ for observations on rec2
-sets.diffPr.threshold_t=0.2;    %Threshold for difference in time between obs_1 and obs_2
+sets.diffPr.threshold_t=0.01;    %Threshold for difference in time between obs_1 and obs_2
 
 %Plot:                          %Which plots to show
 sets.plots.isSim=0;             %If run is simulation or not
@@ -42,7 +43,10 @@ sets.plots.refSat=1;            %Satellite used as reference for DD
 sets.plots.var= @(x) sqrt((var(x)));  
 sets.plots.DD_DOP=1;
 sets.plots.global.plotGPS=0;    %Plot the internal solution together with the global position
-
+sets.plots.global.activeSats=0; %Plot active sats per epoch
+sets.plots.global.DOP=0;        %Plot DOP-values
+sets.plots.global.visSV=0;
+sets.plots.global.histGlobalEst=0; %Plot the histogram of the relative position from global position estimate
 
 %True position (approx) where logging was made (for frames and projection)
 sets.posECEF=[3098534.400000,1011155.550000,5464107.630000]; 

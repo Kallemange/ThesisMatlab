@@ -19,10 +19,7 @@ function [f1,f2, f3, f4]=plot_global_estimate(x1, x2, g1, g2, sets, eph1, eph2)
 %for rec1 and rec2. (Rec. position given current estimate)
 
 %Plot5
-%Histogram over difference in position from internal solution, position for
-%rec2 interpolated around time for rec1
-%Define reference position in ECEF and LLA-coordinates as the first reading
-%of receiver 1
+%Histogram over difference in position from global position
 
 %Plot6
 %Number of used satellites for receiver 1 and 2 per epoch
@@ -92,7 +89,7 @@ for i=1:3
             +"g_2:"+num2str(round(mean(g2NED(:,i)),1));
     end
     legend(leg1)
-    xlabel(xlabelStr1)
+    xlabel(xlabelStr1, 'fontSize', 12)
     ylabel(dirVec(i))
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -131,65 +128,62 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Plot 3
 f3=figure;
-allsat=unique([x1.satID; x2.satID]);
-distObsNorm(x2, allsat, "true", "rec1")
-distObsNorm(x1, allsat, "true", "rec2")
+    allsat=unique([x1.satID; x2.satID]);
+    distObsNorm(x2, allsat, "true", "rec1")
+    distObsNorm(x1, allsat, "true", "rec2")
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Plot 4
 f4=figure;
 distObsNorm(x2, allsat, "est", "rec1")
 distObsNorm(x1, allsat, "est", "rec2")
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %Figure 5
-% if any(strcmp(g1.Properties.VariableNames,"ToWms"))
-%     [t1idx, t2idx]=findT0toEnd(g1.ToWms,g2.ToWms);
-% else
-%     [t1idx, t2idx]=findT0toEnd(g1.timeOfWeek,g2.timeOfWeek);
-% end
-% [g1_inter, g2_inter]=interpolGPS(g1,g2, t1idx, t2idx);
-% [x, y, z]=ecef2ned(g1_inter(:,1), g1_inter(:,2), g1_inter(:,3), pL(1), pL(2), pL(3), spheroid);
-% g1_inter=[x, y, z];
-% [x, y, z]=ecef2ned(g2_inter(:,1), g2_inter(:,2), g2_inter(:,3), pL(1), pL(2), pL(3), spheroid);
-% g2_inter=[x, y, z];
-% diffPos=g2_inter-g1_inter;
-% figure
-% for i=1:3
-%    hold on
-%    histogram(diffPos(:,i),'Normalization','probability', 'DisplayStyle', 'stairs')
-% end
-% legend("N", "E", "D")
-% mu1=string(round(mean(diffPos), 1));
-% sigma2=string(round(var(diffPos), 1));
-% xlabel("N, E, D direction mean: "+mu1(1)+", "+mu1(2)+", "+mu1(3)+" [m]"+...
-%        ", variance: "+sigma2(1)+", "+sigma2(2)+", "+sigma2(3))
-% sgtitle("Histogram over distances between receivers from internal solution in NED [m]")
-
+if sets.plots.global.histGlobalEst
+    figure
+   [t1, t2]=matchRecTime(x1,x2);
+   NEDStr=["N", "E", "D"];
+   for i=1:3
+       subplot(3,1,i)
+       histogram(x1NED(t1,i)-x2NED(t2,i),'Normalization','probability', 'DisplayStyle', 'stairs')
+       mu=mean(x1NED(t1,i)-x2NED(t2,i));
+       sigma=sqrt(var(x1NED(t1,i)-x2NED(t2,i)));
+       xlabel(NEDStr(i)+"-direction, mean: "+num2str(round(mu,1))+", \sigma: " + num2str(round(sigma,1)))
+   end
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Figure 6
 %Number of visible satellites for the receivers over time
-figure
-sgtitle("Number visible satellites for rec_1 and rec_2") 
-plot(x1.visSV(:,1)-x1.visSV(1),x1.visSV(:,2))
-hold on
-plot(x2.visSV(:,1)-x1.visSV(1),x2.visSV(:,2))
-legend("rec_1", "rec_2")
-xlabel("Time since startup [s]")
-ylabel("#Visible sv")
-
+if sets.plots.global.visSV==1
+    figure
+    sgtitle("Number visible satellites for rec_1 and rec_2") 
+    plot(x1.visSV(:,1)-x1.visSV(1),x1.visSV(:,2))
+    hold on
+    plot(x2.visSV(:,1)-x1.visSV(1),x2.visSV(:,2))
+    legend("rec_1", "rec_2")
+    xlabel("Time since startup [s]")
+    ylabel("#Visible sv")
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Figure 7
 % Plot all sv's active at a given time
-activeSatsPerEpoch(x1,eph1, "rec1")
-activeSatsPerEpoch(x2,eph2, "rec2")
+if sets.plots.global.activeSats==1
+    activeSatsPerEpoch(x1,eph1, "rec1")
+    activeSatsPerEpoch(x2,eph2, "rec2")
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Figure 8
 % Plot the DOP Values
-f8=figure;
-f8=plotDOP(x1, f8, 1);
-f8=plotDOP(x2, f8, 2);
-figure(f8);
-sgtitle("DOP-values for receiver 1 and 2 over time")
+if sets.plots.global.DOP==1
+    f8=figure;
+    f8=plotDOP(x1, f8, 1);
+    f8=plotDOP(x2, f8, 2);
+    figure(f8);
+    saveas(f8, 'Figures/DOPx,','epsc')
+    saveas(f8, 'Figures/DOPx,','fig')
+    %sgtitle("DOP-values for receiver 1 and 2 over time")
+end
 end
 
 function activeSatsPerEpoch(x,eph, rec)
@@ -327,9 +321,11 @@ function fig=plotDOP(x, fig, idx)
     figure(fig)
     subplot(2,1,idx)
     hold on
-    plot(x.tVec, HDOP, x.tVec,VDOP, x.tVec,TDOP,x.tVec,GDOP)
+    plot(x.tVec-x.tVec(1), HDOP,...
+         x.tVec-x.tVec(1), VDOP,...
+         x.tVec-x.tVec(1), TDOP,...
+         x.tVec-x.tVec(1), GDOP)
     leg=legend("HDOP", "VDOP", "TDOP", "GDOP");
     leg.Title.String="rec"+num2str(idx);
-    xlabel("Time since startup, mean HDOP: "+num2str(round(mean(HDOP),2))+", VDOP:"+...
-                                        num2str(round(mean(VDOP),2)))
+    xlabel("Time since startup [s]", 'fontSize', 12)
 end
